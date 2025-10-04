@@ -29,10 +29,15 @@ def read_root():
 cache = {}
 
 weather_categories = [
+    "sunny",
     "rainy",
     "cloudy",
-    "snow",
-    "sunny",
+    "stormy",
+    "snowy",
+    "foggy",
+    "windy",
+    "partly_cloudy",
+    "overcast",
 ]
 
 
@@ -65,4 +70,4 @@ def get_weather(location: Union[str, None] = None, date: Union[str, None] = None
         raise HTTPException(status_code=400, detail="Bad date")
 
     data = get_result(date)
-    return json.dumps(data)
+    return data
