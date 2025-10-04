@@ -1,9 +1,16 @@
 import { FC, useState } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { Alert, Button, StyleSheet, Text, View } from 'react-native';
 
 import DatePicker from 'react-native-date-picker';
 import { Dropdown } from 'react-native-element-dropdown';
 import { locations } from '../data/locations';
+import { getWeather } from '../services/weather';
+
+interface Prediction {
+  date: string;
+  weather: string;
+  probability: number;
+}
 
 const data = locations
   .map(item => ({
@@ -18,8 +25,18 @@ export const HomeScreen: FC = () => {
   const [open, setOpen] = useState(false);
 
   // Location
-  const [value, setValue] = useState(null);
+  const [location, setLocation] = useState('');
   const [isFocus, setIsFocus] = useState(false);
+
+  const [prediction, setPrediction] = useState<Prediction>();
+
+  const getPrediction = async () => {
+    const _prediction = await getWeather(
+      location,
+      date.toISOString().substring(0, 10),
+    );
+    setPrediction(_prediction);
+  };
 
   return (
     <View style={styles.main}>
@@ -38,11 +55,11 @@ export const HomeScreen: FC = () => {
         valueField="value"
         placeholder={!isFocus ? 'Select item' : '...'}
         searchPlaceholder="Search..."
-        value={value}
+        value={location}
         onFocus={() => setIsFocus(true)}
         onBlur={() => setIsFocus(false)}
         onChange={item => {
-          setValue(item.value);
+          setLocation(item.value);
           setIsFocus(false);
         }}
         // renderLeftIcon={() => (
@@ -69,6 +86,17 @@ export const HomeScreen: FC = () => {
           setOpen(false);
         }}
       />
+
+      {prediction ? (
+        <View>
+          <Text>{prediction.weather}</Text>
+          <Text>{prediction.probability}</Text>
+        </View>
+      ) : (
+        <></>
+      )}
+
+      <Button title="Get prediction" onPress={getPrediction} />
     </View>
   );
 };
