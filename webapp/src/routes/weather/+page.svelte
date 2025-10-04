@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { getSearchHistory } from '$lib/searchHistory';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -10,13 +11,19 @@
 
 	let location = $state(data.location);
 	let date = $state(data.date);
+	let searchId = data.searchId;
 
 	let weatherCondition: any = $state();
 	let loading = $state(false);
 	let error = $state('');
 
 	function goBack() {
-		goto('/');
+		// If we came from search history, go back to dashboard
+		if (searchId) {
+			goto('/dashboard');
+		} else {
+			goto('/');
+		}
 	}
 
 	// Format date for display
@@ -81,6 +88,23 @@
 
 	$effect(() => {
 		if (location && date) {
+			// If we have a searchId, try to load from history first
+			if (searchId) {
+				const history = getSearchHistory();
+				const existingSearch = history.find((item) => item.id === searchId);
+
+				if (existingSearch?.weatherResult) {
+					// Use historical data
+					weatherCondition = {
+						weather: existingSearch.weatherResult.weather,
+						probability: existingSearch.weatherResult.probability,
+						date: existingSearch.weatherResult.date
+					};
+					return;
+				}
+			}
+
+			// Otherwise fetch fresh data
 			fetchWeatherData(location, date);
 		}
 	});
@@ -102,7 +126,7 @@
 							d="M10 19l-7-7m0 0l7-7m-7 7h18"
 						></path>
 					</svg>
-					Back to search
+					{searchId ? 'Back to history' : 'Back to search'}
 				</button>
 				<h1 class="text-2xl font-bold text-gray-800">Weather Forecast</h1>
 			</div>
