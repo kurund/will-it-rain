@@ -49,6 +49,18 @@ export function addSearchToHistory(location: string, date: string): string {
 	}
 }
 
+export function deleteSearchFromHistory(id: string) {
+	if (typeof window === 'undefined') return;
+
+	try {
+		const history = getSearchHistory();
+		const filteredHistory = history.filter((item) => item.id !== id);
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredHistory));
+	} catch (error) {
+		console.error('Error deleting search from history:', error);
+	}
+}
+
 export function clearSearchHistory() {
 	if (typeof window === 'undefined') return;
 

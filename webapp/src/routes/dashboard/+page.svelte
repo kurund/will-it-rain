@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { getSearchHistory, clearSearchHistory, type SearchHistoryItem } from '$lib/searchHistory';
+	import {
+		getSearchHistory,
+		clearSearchHistory,
+		deleteSearchFromHistory,
+		type SearchHistoryItem
+	} from '$lib/searchHistory';
 
 	let searchHistory = $state<SearchHistoryItem[]>([]);
 
@@ -16,9 +21,18 @@
 	function viewWeather(item: SearchHistoryItem) {
 		const params = new URLSearchParams({
 			location: item.location,
-			date: item.date
+			date: item.date,
+			searchId: item.id
 		});
 		goto(`/weather?${params.toString()}`);
+	}
+
+	function deleteItem(item: SearchHistoryItem, event: Event) {
+		event.stopPropagation(); // Prevent triggering the view weather action
+		if (confirm(`Delete search for ${item.location}?`)) {
+			deleteSearchFromHistory(item.id);
+			searchHistory = getSearchHistory();
+		}
 	}
 
 	function clearHistory() {
@@ -107,12 +121,14 @@
 			{:else}
 				<div class="space-y-4">
 					{#each searchHistory as item (item.id)}
-						<button
-							class="group w-full cursor-pointer rounded-lg border border-gray-200 p-4 text-left transition-all hover:border-blue-300 hover:shadow-md"
-							onclick={() => viewWeather(item)}
+						<div
+							class="group rounded-lg border border-gray-200 transition-all hover:border-blue-300 hover:shadow-md"
 						>
-							<div class="flex items-center justify-between">
-								<div class="flex-1">
+							<div class="flex items-center">
+								<button
+									class="flex-1 cursor-pointer p-4 text-left"
+									onclick={() => viewWeather(item)}
+								>
 									<div class="flex items-center gap-3">
 										<div class="text-2xl">
 											{#if item.weatherResult}
@@ -121,7 +137,7 @@
 												🌤️
 											{/if}
 										</div>
-										<div>
+										<div class="flex-1">
 											<h3 class="font-semibold text-gray-800">{item.location}</h3>
 											<p class="text-sm text-gray-600">
 												Travel date: {formatDate(item.date)}
@@ -133,13 +149,29 @@
 											{/if}
 										</div>
 									</div>
-								</div>
-								<div class="text-right">
-									<p class="text-xs text-gray-500">
-										Searched {formatTimestamp(item.timestamp)}
-									</p>
+								</button>
+								<div class="flex items-center gap-2 pr-4">
+									<div class="text-right">
+										<p class="text-xs text-gray-500">
+											Searched {formatTimestamp(item.timestamp)}
+										</p>
+									</div>
+									<button
+										onclick={(e) => deleteItem(item, e)}
+										class="shake-on-hover rounded p-1 text-gray-400 transition-colors hover:bg-red-100 hover:text-red-600"
+										title="Delete this search"
+									>
+										<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+											></path>
+										</svg>
+									</button>
 									<svg
-										class="mt-1 h-5 w-5 text-gray-400 transition-colors group-hover:text-blue-600"
+										class="h-5 w-5 text-gray-400 transition-colors group-hover:text-blue-600"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -153,7 +185,7 @@
 									</svg>
 								</div>
 							</div>
-						</button>
+						</div>
 					{/each}
 				</div>
 
@@ -170,3 +202,22 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	@keyframes shake {
+		0%,
+		100% {
+			transform: translateX(0) scale(1);
+		}
+		25% {
+			transform: translateX(-2px) scale(0.95);
+		}
+		75% {
+			transform: translateX(2px) scale(0.95);
+		}
+	}
+
+	.shake-on-hover:hover {
+		animation: shake 0.3s ease-in-out;
+	}
+</style>

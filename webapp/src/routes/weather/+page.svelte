@@ -18,7 +18,12 @@
 	let error = $state('');
 
 	function goBack() {
-		goto('/');
+		// If we came from search history, go back to dashboard
+		if (searchId) {
+			goto('/dashboard');
+		} else {
+			goto('/');
+		}
 	}
 
 	// Format date for display
@@ -121,7 +126,7 @@
 							d="M10 19l-7-7m0 0l7-7m-7 7h18"
 						></path>
 					</svg>
-					Back to search
+					{searchId ? 'Back to history' : 'Back to search'}
 				</button>
 				<h1 class="text-2xl font-bold text-gray-800">Weather Forecast</h1>
 			</div>
