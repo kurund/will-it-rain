@@ -1,10 +1,12 @@
 import { FC, useState } from 'react';
-import { Alert, Button, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 
 import DatePicker from 'react-native-date-picker';
 import { Dropdown } from 'react-native-element-dropdown';
 import { locations } from '../data/locations';
 import { getWeather } from '../services/weather';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import { Button } from '../components/Button';
 
 interface Prediction {
   date: string;
@@ -18,6 +20,9 @@ const data = locations
     value: item.location_name,
   }))
   .sort((a, b) => (a.label > b.label ? 1 : -1));
+
+const SCREEN_HEIGHT = Dimensions.get('screen').height;
+const SCREEN_WIDTH = Dimensions.get('screen').width;
 
 export const HomeScreen: FC = () => {
   // Date
@@ -40,6 +45,25 @@ export const HomeScreen: FC = () => {
 
   return (
     <View style={styles.main}>
+      <Svg
+        height={SCREEN_HEIGHT}
+        width={SCREEN_WIDTH}
+        style={{ position: 'absolute', top: 0, left: 0 }}
+      >
+        <Defs>
+          <LinearGradient id="grad" x1="1" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor="#3399ff" stopOpacity="1" />
+            <Stop offset="1" stopColor="#003366" stopOpacity="1" />
+          </LinearGradient>
+        </Defs>
+        <Rect
+          x="0"
+          y="0"
+          width={SCREEN_WIDTH}
+          height={SCREEN_HEIGHT}
+          fill="url(#grad)"
+        />
+      </Svg>
       <Text style={styles.title}>Get My Weather</Text>
 
       <Dropdown
@@ -87,16 +111,16 @@ export const HomeScreen: FC = () => {
         }}
       />
 
+      <Button title="Get prediction" onPress={getPrediction} />
+
       {prediction ? (
         <View>
-          <Text>{prediction.weather}</Text>
-          <Text>{prediction.probability}</Text>
+          <Text style={styles.predictionText}>{prediction.weather}</Text>
+          <Text style={styles.predictionText}>{prediction.probability}</Text>
         </View>
       ) : (
         <></>
       )}
-
-      <Button title="Get prediction" onPress={getPrediction} />
     </View>
   );
 };
@@ -132,5 +156,16 @@ const styles = StyleSheet.create({
   inputSearchStyle: {
     height: 40,
     fontSize: 16,
+  },
+
+  button: {
+    color: '#fff',
+  },
+
+  predictionText: {
+    color: '#fff',
+    fontSize: 32,
+    textAlign: 'center',
+    margin: 20,
   },
 });
