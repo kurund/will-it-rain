@@ -103,10 +103,10 @@
 			<!-- Animated weather icon -->
 			<div
 				class="mb-4 transform cursor-pointer text-8xl transition-all duration-500 hover:scale-110"
-				on:click={rotateEmoji}
+				onclick={rotateEmoji}
 				role="button"
 				tabindex="0"
-				on:keydown={(e) => e.key === 'Enter' && rotateEmoji()}
+				onkeydown={(e) => e.key === 'Enter' && rotateEmoji()}
 			>
 				{currentEmoji}
 			</div>
@@ -119,7 +119,7 @@
 			<p class="text-lg text-gray-600">Discover the weather forecast for any location ✨</p>
 		</div>
 
-		<form on:submit={handleSubmit} class="space-y-6">
+		<form onsubmit={handleSubmit} class="space-y-6">
 			<div class="group">
 				<label
 					for="location"
