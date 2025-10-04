@@ -6,6 +6,10 @@
 	let date = '';
 	let isLoaded = false;
 	let floatingClouds = false;
+	let locations: Array<{ country: string; location_name: string }> = [];
+	let filteredLocations: Array<{ country: string; location_name: string }> = [];
+	let searchTerm = '';
+	let showDropdown = false;
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
@@ -23,8 +27,57 @@
 	const today = new Date().toISOString().split('T')[0];
 	date = today;
 
+	// Load locations data
+	async function loadLocations() {
+		try {
+			const response = await fetch('/data/locations.json');
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			locations = await response.json();
+			filteredLocations = locations;
+			console.log('Loaded locations:', locations.length, 'items');
+		} catch (error) {
+			console.error('Failed to load locations:', error);
+		}
+	}
+
+	// Filter locations based on search term
+	function filterLocations(search: string) {
+		if (!search.trim()) {
+			filteredLocations = locations;
+			return;
+		}
+
+		const searchLower = search.toLowerCase();
+		filteredLocations = locations.filter(
+			(loc) =>
+				loc.location_name.toLowerCase().includes(searchLower) ||
+				loc.country.toLowerCase().includes(searchLower)
+		);
+	}
+
+	// Handle location selection
+	function selectLocation(selectedLocation: { country: string; location_name: string }) {
+		location = `${selectedLocation.location_name}, ${selectedLocation.country}`;
+		searchTerm = location;
+		showDropdown = false;
+	}
+
+	// Handle search input
+	function handleSearchInput(event: Event) {
+		const target = event.target as HTMLInputElement;
+		searchTerm = target.value;
+		location = searchTerm;
+		console.log('Search term:', searchTerm);
+		filterLocations(searchTerm);
+		showDropdown = searchTerm.length > 0;
+		console.log('Filtered locations:', filteredLocations.length, 'Show dropdown:', showDropdown);
+	}
+
 	onMount(() => {
 		isLoaded = true;
+		loadLocations();
 		setTimeout(() => {
 			floatingClouds = true;
 		}, 500);
@@ -120,7 +173,7 @@
 		</div>
 
 		<form onsubmit={handleSubmit} class="space-y-6">
-			<div class="group">
+			<div class="group relative">
 				<label
 					for="location"
 					class="mb-2 block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-blue-600"
@@ -130,11 +183,46 @@
 				<input
 					type="text"
 					id="location"
-					bind:value={location}
-					placeholder="Enter city name or address..."
+					bind:value={searchTerm}
+					oninput={handleSearchInput}
+					onfocus={() => (showDropdown = searchTerm.length > 0)}
+					onblur={() => setTimeout(() => (showDropdown = false), 200)}
+					placeholder="Search for a city..."
 					required
 					class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-lg shadow-sm transition-all duration-300 hover:border-blue-300 hover:shadow-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+					autocomplete="off"
 				/>
+
+				{#if showDropdown && filteredLocations.length > 0}
+					<div
+						class="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg"
+					>
+						{#each filteredLocations.slice(0, 10) as loc}
+							<button
+								type="button"
+								onclick={() => selectLocation(loc)}
+								class="w-full border-b border-gray-100 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none"
+							>
+								<div class="font-medium text-gray-800">{loc.location_name}</div>
+								<div class="text-sm text-gray-500">{loc.country}</div>
+							</button>
+						{/each}
+
+						{#if filteredLocations.length > 10}
+							<div class="border-t px-4 py-2 text-center text-sm text-gray-500">
+								Showing first 10 results. Keep typing to narrow down...
+							</div>
+						{/if}
+					</div>
+				{/if}
+
+				{#if showDropdown && filteredLocations.length === 0 && searchTerm.length > 0}
+					<div
+						class="absolute z-10 mt-1 w-full rounded-xl border border-gray-200 bg-white p-4 text-center text-gray-500 shadow-lg"
+					>
+						No locations found matching "{searchTerm}"
+					</div>
+				{/if}
 			</div>
 
 			<div class="group">
