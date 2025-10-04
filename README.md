@@ -4,18 +4,19 @@
 ---
 
 ## 🚀 Overview
-**Will It Rain On My Parade?** is a web application that helps users plan outdoor activities by predicting the likelihood of uncomfortable weather conditions.  
+**Will It Rain On My Parade?** is a web and mobile application that helps users plan outdoor activities by predicting the likelihood of uncomfortable weather conditions.  
 Instead of generic forecasts, the app translates NASA Earth observation data into **personalized risk categories**:  
-- 🌡️ Very Hot  
-- 🧊 Very Cold  
-- 🌬️ Very Windy  
-- ☔ Very Wet  
-- 😓 Very Uncomfortable  
+
+- 🌡️ Very Hot - bring your water bottle 🥵
+- 🧊 Very Cold - wrap up warm ❄️
+- 🌬️ Very Windy - bring a jacket! 🧥
+- ☔ Very Wet - perhaps an umbrella? ☔️
+- 😓 Polluted - remember a facemask! 😷
 
 ---
 
 ## 🌍 Features
-- **Custom Query** – Users enter a location (map or search) and a date/time.  
+- **Custom Query** – Users enter a location (search) and a date.  
 - **Weather Risk Categories** – Get a clear probability of extreme or uncomfortable weather.  
 - **Interactive UI** – Color-coded indicators and intuitive icons.  
 - **Mobile-first Design** – Optimized for both desktop and mobile.  
@@ -25,6 +26,7 @@ Instead of generic forecasts, the app translates NASA Earth observation data int
 
 ## 📊 Data Sources
 We use NASA’s Earth Science Division datasets:  
+- **Global Weather Repository
 - **GPM (Global Precipitation Measurement):** rainfall likelihood  
 - **MERRA-2:** temperature, wind, humidity reanalysis  
 - **GEOS:** atmospheric conditions  
@@ -33,8 +35,8 @@ We use NASA’s Earth Science Division datasets:
 ---
 
 ## 🧩 Tech Stack
-- **Frontend:** HTML, CSS (Tailwind), JavaScript (React)  
-- **Backend:** Node.js + Express (for API calls & processing)  
+- **Frontend:** HTML, CSS (Tailwind), JavaScript, Svelte.kit 
+- **Backend:** Python + fastAPI (for API calls and processing)
 - **APIs / Data:** NASA Earthdata APIs, GES DISC, Open-Meteo (for integration fallback)  
 - **Visualization:** Leaflet.js / Mapbox for maps, Chart.js / D3.js for graphs  
 - **Deployment:** Vercel / Netlify (Frontend), Render / Heroku (Backend)  
