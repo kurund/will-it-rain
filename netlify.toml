@@ -1,4 +1,4 @@
 [build]
   base = "webapp"
   command = "pnpm run build"
-  publish = "webapp/build"
+  publish = "build"
