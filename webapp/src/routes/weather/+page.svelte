@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { getSearchHistory } from '$lib/searchHistory';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -10,6 +11,7 @@
 
 	let location = $state(data.location);
 	let date = $state(data.date);
+	let searchId = data.searchId;
 
 	let weatherCondition: any = $state();
 	let loading = $state(false);
@@ -81,6 +83,23 @@
 
 	$effect(() => {
 		if (location && date) {
+			// If we have a searchId, try to load from history first
+			if (searchId) {
+				const history = getSearchHistory();
+				const existingSearch = history.find((item) => item.id === searchId);
+
+				if (existingSearch?.weatherResult) {
+					// Use historical data
+					weatherCondition = {
+						weather: existingSearch.weatherResult.weather,
+						probability: existingSearch.weatherResult.probability,
+						date: existingSearch.weatherResult.date
+					};
+					return;
+				}
+			}
+
+			// Otherwise fetch fresh data
 			fetchWeatherData(location, date);
 		}
 	});

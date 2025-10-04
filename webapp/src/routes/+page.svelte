@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { addSearchToHistory } from '$lib/searchHistory';
 
 	let location = $state('');
 	let date = $state('');
@@ -14,9 +15,13 @@
 		event.preventDefault();
 
 		if (location.trim() && date) {
+			// Save to search history
+			const searchId = addSearchToHistory(location.trim(), date);
+
 			const params = new URLSearchParams({
 				location: location.trim(),
-				date
+				date,
+				searchId
 			});
 			goto(`/weather?${params.toString()}`);
 		}
@@ -158,6 +163,24 @@
 			: 'scale-95 opacity-0'} transition-all duration-700 ease-out"
 	>
 		<div class="mb-8 text-center">
+			<!-- Dashboard link -->
+			<div class="mb-4 flex justify-end">
+				<button
+					onclick={() => goto('/dashboard')}
+					class="flex items-center text-gray-600 transition-colors hover:text-blue-600"
+				>
+					<svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+						></path>
+					</svg>
+					My Searches
+				</button>
+			</div>
+
 			<!-- Animated weather icon -->
 			<div
 				class="mb-4 transform cursor-pointer text-8xl transition-all duration-500 hover:scale-110"
