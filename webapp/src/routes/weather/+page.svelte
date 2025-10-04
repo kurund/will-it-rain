@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { env } from '$env/dynamic/public';
 
 	let location = $page.url.searchParams.get('location') || '';
 	let date = $page.url.searchParams.get('date') || '';
@@ -49,8 +48,7 @@
 		error = '';
 
 		try {
-			// const backendUrl = env.VITE_BACKEND_URL;
-			const backendUrl = 'http://localhost:8000';
+			const backendUrl = import.meta.env.VITE_BACKEND_URL;
 			const response = await fetch(
 				`${backendUrl}/weather?location=${encodeURIComponent(location)}&date=${date}`
 			);
