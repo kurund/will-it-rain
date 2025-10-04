@@ -1,2 +1,184 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+
+	let location = '';
+	let date = '';
+	let isLoaded = false;
+	let floatingClouds = false;
+
+	function handleSubmit(event: Event) {
+		event.preventDefault();
+
+		if (location.trim() && date) {
+			const params = new URLSearchParams({
+				location: location.trim(),
+				date
+			});
+			goto(`/weather?${params.toString()}`);
+		}
+	}
+
+	// Set default date to today
+	const today = new Date().toISOString().split('T')[0];
+	date = today;
+
+	onMount(() => {
+		isLoaded = true;
+		setTimeout(() => {
+			floatingClouds = true;
+		}, 500);
+	});
+
+	// Weather emojis that change randomly
+	const weatherEmojis = ['🌤️', '☀️', '⛅', '🌧️', '⛈️', '🌈', '❄️', '🌪️'];
+	let currentEmoji = weatherEmojis[0];
+
+	function rotateEmoji() {
+		const randomIndex = Math.floor(Math.random() * weatherEmojis.length);
+		currentEmoji = weatherEmojis[randomIndex];
+	}
+
+	// Auto-rotate emoji every 3 seconds
+	onMount(() => {
+		const interval = setInterval(rotateEmoji, 3000);
+		return () => clearInterval(interval);
+	});
+</script>
+
+<div
+	class="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-blue-400 via-purple-500 to-blue-600 p-4"
+>
+	<!-- Floating background elements -->
+	<div class="pointer-events-none absolute inset-0 overflow-hidden">
+		<!-- Floating clouds -->
+		<div
+			class="absolute top-20 left-10 text-6xl opacity-20 {floatingClouds ? 'animate-bounce' : ''}"
+			style="animation-delay: 0s;"
+		>
+			☁️
+		</div>
+		<div
+			class="absolute top-32 right-20 text-4xl opacity-30 {floatingClouds ? 'animate-pulse' : ''}"
+			style="animation-delay: 1s;"
+		>
+			⛅
+		</div>
+		<div
+			class="absolute bottom-40 left-20 text-5xl opacity-25 {floatingClouds
+				? 'animate-bounce'
+				: ''}"
+			style="animation-delay: 2s;"
+		>
+			🌤️
+		</div>
+		<div
+			class="absolute top-60 right-10 text-3xl opacity-20 {floatingClouds ? 'animate-pulse' : ''}"
+			style="animation-delay: 0.5s;"
+		>
+			☀️
+		</div>
+
+		<!-- Animated particles -->
+		<div
+			class="absolute top-1/4 left-1/3 h-2 w-2 animate-ping rounded-full bg-white opacity-60"
+			style="animation-delay: 1s;"
+		></div>
+		<div
+			class="absolute top-3/4 right-1/4 h-1 w-1 animate-ping rounded-full bg-yellow-200 opacity-80"
+			style="animation-delay: 2s;"
+		></div>
+		<div
+			class="absolute top-1/2 left-1/4 h-1.5 w-1.5 animate-ping rounded-full bg-white opacity-50"
+			style="animation-delay: 3s;"
+		></div>
+	</div>
+
+	<div
+		class="w-full max-w-md transform rounded-2xl bg-white/95 p-8 shadow-2xl backdrop-blur-sm {isLoaded
+			? 'scale-100 opacity-100'
+			: 'scale-95 opacity-0'} transition-all duration-700 ease-out"
+	>
+		<div class="mb-8 text-center">
+			<!-- Animated weather icon -->
+			<div
+				class="mb-4 transform cursor-pointer text-8xl transition-all duration-500 hover:scale-110"
+				on:click={rotateEmoji}
+				role="button"
+				tabindex="0"
+				on:keydown={(e) => e.key === 'Enter' && rotateEmoji()}
+			>
+				{currentEmoji}
+			</div>
+
+			<h1
+				class="mb-3 animate-pulse bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-4xl font-bold text-transparent"
+			>
+				Will It Rain?
+			</h1>
+			<p class="text-lg text-gray-600">Discover the weather forecast for any location ✨</p>
+		</div>
+
+		<form on:submit={handleSubmit} class="space-y-6">
+			<div class="group">
+				<label
+					for="location"
+					class="mb-2 block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-blue-600"
+				>
+					📍 Location
+				</label>
+				<input
+					type="text"
+					id="location"
+					bind:value={location}
+					placeholder="Enter city name or address..."
+					required
+					class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-lg shadow-sm transition-all duration-300 hover:border-blue-300 hover:shadow-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+				/>
+			</div>
+
+			<div class="group">
+				<label
+					for="date"
+					class="mb-2 block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-blue-600"
+				>
+					📅 Date
+				</label>
+				<input
+					type="date"
+					id="date"
+					bind:value={date}
+					required
+					class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-lg shadow-sm transition-all duration-300 hover:border-blue-300 hover:shadow-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+				/>
+			</div>
+
+			<button
+				type="submit"
+				disabled={!location.trim() || !date}
+				class="w-full transform rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 text-lg font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg focus:ring-4 focus:ring-blue-300 focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+			>
+				<span class="flex items-center justify-center"> 🌦️ Check Weather </span>
+			</button>
+		</form>
+
+		<!-- Fun fact section -->
+		<div class="mt-8 rounded-xl border border-blue-100 bg-blue-50 p-4">
+			<p class="text-center text-sm text-blue-800">
+				💡 <strong>Fun fact:</strong> Click the weather icon above to see different weather types!
+			</p>
+		</div>
+	</div>
+</div>
+
+<style>
+	@keyframes float {
+		0%,
+		100% {
+			transform: translateY(0px);
+		}
+		50% {
+			transform: translateY(-20px);
+		}
+	}
+</style>
