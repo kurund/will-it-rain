@@ -101,18 +101,18 @@
 >
 	<!-- Floating background elements -->
 	<div class="pointer-events-none absolute inset-0 overflow-hidden">
-		<!-- Floating clouds -->
+		<!-- Floating travel icons -->
 		<div
 			class="absolute top-20 left-10 text-6xl opacity-20 {floatingClouds ? 'animate-bounce' : ''}"
 			style="animation-delay: 0s;"
 		>
-			☁️
+			✈️
 		</div>
 		<div
 			class="absolute top-32 right-20 text-4xl opacity-30 {floatingClouds ? 'animate-pulse' : ''}"
 			style="animation-delay: 1s;"
 		>
-			⛅
+			🏖️
 		</div>
 		<div
 			class="absolute bottom-40 left-20 text-5xl opacity-25 {floatingClouds
@@ -120,13 +120,21 @@
 				: ''}"
 			style="animation-delay: 2s;"
 		>
-			🌤️
+			🗺️
 		</div>
 		<div
 			class="absolute top-60 right-10 text-3xl opacity-20 {floatingClouds ? 'animate-pulse' : ''}"
 			style="animation-delay: 0.5s;"
 		>
-			☀️
+			🧳
+		</div>
+		<div
+			class="absolute right-32 bottom-20 text-4xl opacity-25 {floatingClouds
+				? 'animate-bounce'
+				: ''}"
+			style="animation-delay: 3s;"
+		>
+			🏔️
 		</div>
 
 		<!-- Animated particles -->
@@ -166,7 +174,8 @@
 			>
 				Will It Rain?
 			</h1>
-			<p class="text-lg text-gray-600">Discover the weather forecast for any location ✨</p>
+			<p class="text-lg text-gray-600">Plan your perfect vacation with confidence ✈️</p>
+			<p class="mt-1 text-sm text-gray-500">Check weather forecasts for your travel destination</p>
 		</div>
 
 		<form onsubmit={handleSubmit} class="space-y-6">
@@ -175,7 +184,7 @@
 					for="location"
 					class="mb-2 block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-blue-600"
 				>
-					📍 Location
+					🌍 Travel Destination
 				</label>
 				<input
 					type="text"
@@ -184,7 +193,7 @@
 					oninput={handleSearchInput}
 					onfocus={() => (showDropdown = searchTerm.length > 0)}
 					onblur={() => setTimeout(() => (showDropdown = false), 200)}
-					placeholder="Search for a city..."
+					placeholder="Where are you planning to go?"
 					required
 					class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-lg shadow-sm transition-all duration-300 hover:border-blue-300 hover:shadow-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
 					autocomplete="off"
@@ -227,7 +236,7 @@
 					for="date"
 					class="mb-2 block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-blue-600"
 				>
-					📅 Date
+					🗓️ Travel Date
 				</label>
 				<input
 					type="date"
@@ -243,7 +252,7 @@
 				disabled={!location.trim() || !date}
 				class="w-full transform rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 text-lg font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg focus:ring-4 focus:ring-blue-300 focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
 			>
-				<span class="flex items-center justify-center"> 🌦️ Check Weather </span>
+				<span class="flex items-center justify-center"> ✈️ Plan My Trip </span>
 			</button>
 		</form>
 
