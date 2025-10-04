@@ -31,7 +31,7 @@ Instead of generic forecasts, the app translates NASA Earth observation data int
 
 We use NASA’s Earth Science Division datasets:
 
-- \*\*Global Weather Repository
+- Global Weather Repository
 - **GPM (Global Precipitation Measurement):** rainfall likelihood
 - **MERRA-2:** temperature, wind, humidity reanalysis
 - **GEOS:** atmospheric conditions
