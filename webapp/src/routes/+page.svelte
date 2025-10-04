@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 
-	let location = '';
-	let date = '';
-	let isLoaded = false;
-	let floatingClouds = false;
-	let locations: Array<{ country: string; location_name: string }> = [];
-	let filteredLocations: Array<{ country: string; location_name: string }> = [];
-	let searchTerm = '';
-	let showDropdown = false;
+	let location = $state('');
+	let date = $state('');
+	let isLoaded = $state(false);
+	let floatingClouds = $state(false);
+	let locations = $state<Array<{ country: string; location_name: string }>>([]);
+	let filteredLocations = $state<Array<{ country: string; location_name: string }>>([]);
+	let searchTerm = $state('');
+	let showDropdown = $state(false);
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
@@ -69,13 +68,11 @@
 		const target = event.target as HTMLInputElement;
 		searchTerm = target.value;
 		location = searchTerm;
-		console.log('Search term:', searchTerm);
 		filterLocations(searchTerm);
 		showDropdown = searchTerm.length > 0;
-		console.log('Filtered locations:', filteredLocations.length, 'Show dropdown:', showDropdown);
 	}
 
-	onMount(() => {
+	$effect(() => {
 		isLoaded = true;
 		loadLocations();
 		setTimeout(() => {
@@ -85,7 +82,7 @@
 
 	// Weather emojis that change randomly
 	const weatherEmojis = ['🌤️', '☀️', '⛅', '🌧️', '⛈️', '🌈', '❄️', '🌪️'];
-	let currentEmoji = weatherEmojis[0];
+	let currentEmoji = $state(weatherEmojis[0]);
 
 	function rotateEmoji() {
 		const randomIndex = Math.floor(Math.random() * weatherEmojis.length);
@@ -93,7 +90,7 @@
 	}
 
 	// Auto-rotate emoji every 3 seconds
-	onMount(() => {
+	$effect(() => {
 		const interval = setInterval(rotateEmoji, 3000);
 		return () => clearInterval(interval);
 	});

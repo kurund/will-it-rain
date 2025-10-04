@@ -1,9 +1,15 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import type { PageData } from './$types';
 
-	let location = $page.url.searchParams.get('location') || '';
-	let date = $page.url.searchParams.get('date') || '';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
+
+	let location = $state(data.location);
+	let date = $state(data.date);
 
 	let weatherCondition: any = $state();
 	let loading = $state(false);
