@@ -232,8 +232,6 @@
 				console.warn('Failed to geocode location:', err);
 			}
 		}
-
-		// Fresh data will be fetched after globe animation completes
 	}
 
 	function onGlobeLocationReached() {
@@ -386,9 +384,6 @@
 									<p class="mb-4 text-2xl font-bold text-blue-600">
 										Rain Probability: {weatherCondition.probability}%
 									</p>
-									<p class="mb-4 text-gray-600">
-										Weather forecast for {location} on {formatDate(weatherCondition.date || date)}
-									</p>
 								{:else}
 									<div class="mb-4 text-6xl">⏳</div>
 									<h3 class="mb-2 text-xl font-semibold text-gray-800">
@@ -399,15 +394,6 @@
 										on {formatDate(date)}.
 									</p>
 								{/if}
-
-								<div class="mt-6 rounded-lg border border-blue-300 bg-blue-100 p-4">
-									<p class="text-sm text-blue-800">
-										<strong>Location:</strong>
-										{location}<br />
-										<strong>Date:</strong>
-										{date}
-									</p>
-								</div>
 							</div>
 
 							<!-- Current Weather Section -->
