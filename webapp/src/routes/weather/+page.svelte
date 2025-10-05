@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { getSearchHistory } from '$lib/searchHistory';
 	import { geocodeWithFallback, type GeoLocation } from '$lib/geocoding';
+	import { transformWeatherData, type TransformedWeatherData } from '$lib/weatherTransform';
 	import Globe from '$lib/components/Globe.svelte';
 	import CSSParticles from '$lib/components/CSSParticles.svelte';
 	import type { PageData } from './$types';
@@ -16,7 +17,7 @@
 	let date = $state(data.date);
 	let searchId = data.searchId;
 
-	let weatherCondition: any = $state();
+	let transformedWeather: TransformedWeatherData | null = $state(null);
 	let currentWeather: any = $state();
 	let loading = $state(false);
 	let loadingCurrent = $state(false);
@@ -139,16 +140,12 @@
 			}
 
 			const data = await response.json();
-			weatherCondition = data;
+			transformedWeather = transformWeatherData(data);
 		} catch (err) {
 			console.error('Error fetching weather data:', err);
 			error = err instanceof Error ? err.message : 'Failed to fetch weather data';
-			// Fallback to placeholder data
-			weatherCondition = {
-				condition: '🌤️',
-				description: 'Weather data temporarily unavailable',
-				temperature: '--°C'
-			};
+			// Reset on error
+			transformedWeather = null;
 		} finally {
 			loading = false;
 		}
@@ -219,13 +216,9 @@
 				showWeatherDetails = true;
 
 				if (existingSearch.weatherResult) {
-					// Use cached weather data
-					weatherCondition = {
-						weather: existingSearch.weatherResult.weather,
-						probability: existingSearch.weatherResult.probability,
-						airQuality: existingSearch.weatherResult.airQuality,
-						date: existingSearch.weatherResult.date
-					};
+					// For cached data, we'll need to reconstruct or fetch fresh data
+					// since the old format is different from our new transformed format
+					await fetchWeatherData(location, date);
 				} else {
 					// Fetch fresh weather data
 					await fetchWeatherData(location, date);
@@ -256,7 +249,7 @@
 		}, 500);
 
 		// If we don't have weather data yet, fetch it now
-		if (!weatherCondition) {
+		if (!transformedWeather) {
 			fetchWeatherData(location, date);
 		}
 		// Also fetch current weather as additional info
@@ -282,8 +275,8 @@
 	<!-- Weather & Air Quality Effects -->
 
 	<CSSParticles
-		weatherCondition={weatherCondition?.weather}
-		airQuality={weatherCondition?.airQuality}
+		weatherCondition={transformedWeather?.summary.weather}
+		airQuality={transformedWeather?.airQuality.level.toLowerCase()}
 	/>
 
 	<div class="relative mx-auto max-w-4xl">
@@ -395,16 +388,117 @@
 									>
 										Try Again
 									</button>
-								{:else if weatherCondition}
+								{:else if transformedWeather}
 									<div class="mb-4 text-6xl">
-										{getWeatherEmoji(weatherCondition.weather)}
+										{transformedWeather.summary.emoji}
 									</div>
-									<h3 class="mb-2 text-xl font-semibold text-gray-800 capitalize">
-										{weatherCondition.weather} Weather
+									<h3 class="mb-6 text-xl font-semibold text-gray-800">
+										{transformedWeather.summary.condition} Weather
 									</h3>
-									<p class="mb-4 text-2xl font-bold text-blue-600">
-										Rain Probability: {weatherCondition.probability}%
-									</p>
+
+									<!-- Detailed Weather Information -->
+									<div class="grid gap-4 md:grid-cols-2">
+										<!-- Temperature Details -->
+										<div class="rounded-lg bg-white p-4 shadow-sm">
+											<h4 class="mb-3 flex items-center text-lg font-semibold text-gray-800">
+												🌡️ Temperature
+											</h4>
+											<div class="space-y-2 text-sm">
+												<div class="flex justify-between">
+													<span class="text-gray-600">Predicted:</span>
+													<span class="font-medium"
+														>{transformedWeather.forecast.temperature.predicted}°C</span
+													>
+												</div>
+												<div class="flex justify-between">
+													<span class="text-gray-600">Likely range:</span>
+													<span class="font-medium">
+														{transformedWeather.forecast.temperature.range.likely.min}°C - {transformedWeather
+															.forecast.temperature.range.likely.max}°C
+													</span>
+												</div>
+												<div class="flex justify-between">
+													<span class="text-gray-600">Possible range:</span>
+													<span class="font-medium">
+														{transformedWeather.forecast.temperature.range.possible.min}°C - {transformedWeather
+															.forecast.temperature.range.possible.max}°C
+													</span>
+												</div>
+											</div>
+										</div>
+
+										<!-- Rain Details -->
+										<div class="rounded-lg bg-white p-4 shadow-sm">
+											<h4 class="mb-3 flex items-center text-lg font-semibold text-gray-800">
+												🌧️ Precipitation
+											</h4>
+											<div class="space-y-2 text-sm">
+												<div class="flex justify-between">
+													<span class="text-gray-600">Probability:</span>
+													<span class="font-medium"
+														>{transformedWeather.forecast.rain.probability}%</span
+													>
+												</div>
+												<div class="flex justify-between">
+													<span class="text-gray-600">Expected amount:</span>
+													<span class="font-medium"
+														>{transformedWeather.forecast.rain.expectedAmount}mm</span
+													>
+												</div>
+												<p class="mt-2 text-xs text-gray-500 italic">
+													{transformedWeather.forecast.rain.description}
+												</p>
+											</div>
+										</div>
+
+										<!-- Wind Details -->
+										<div class="rounded-lg bg-white p-4 shadow-sm">
+											<h4 class="mb-3 flex items-center text-lg font-semibold text-gray-800">
+												💨 Wind Conditions
+											</h4>
+											<div class="space-y-2 text-sm">
+												{#each transformedWeather.forecast.wind.conditions as windCondition}
+													<div class="flex justify-between">
+														<span class="text-gray-600">{windCondition.type}:</span>
+														<span class="font-medium">{windCondition.probability}%</span>
+													</div>
+												{/each}
+												<p class="mt-2 text-xs text-gray-500 italic">
+													{transformedWeather.forecast.wind.description}
+												</p>
+											</div>
+										</div>
+
+										<!-- Air Quality Details -->
+										<div class="rounded-lg bg-white p-4 shadow-sm">
+											<h4 class="mb-3 flex items-center text-lg font-semibold text-gray-800">
+												🌫️ Air Quality
+											</h4>
+											<div class="space-y-2 text-sm">
+												<div class="flex justify-between">
+													<span class="text-gray-600">Index:</span>
+													<span class="font-medium">{transformedWeather.airQuality.index}</span>
+												</div>
+												<div class="flex justify-between">
+													<span class="text-gray-600">Level:</span>
+													<span
+														class="font-medium {transformedWeather.airQuality.level === 'Low'
+															? 'text-green-600'
+															: transformedWeather.airQuality.level === 'Moderate'
+																? 'text-yellow-600'
+																: transformedWeather.airQuality.level === 'High'
+																	? 'text-orange-600'
+																	: 'text-red-600'}"
+													>
+														{transformedWeather.airQuality.level}
+													</span>
+												</div>
+												<p class="mt-2 text-xs text-gray-500 italic">
+													{transformedWeather.airQuality.description}
+												</p>
+											</div>
+										</div>
+									</div>
 								{:else}
 									<div class="mb-4 text-6xl">⏳</div>
 									<h3 class="mb-2 text-xl font-semibold text-gray-800">
