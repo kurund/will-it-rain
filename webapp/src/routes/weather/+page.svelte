@@ -16,7 +16,9 @@
 	let searchId = data.searchId;
 
 	let weatherCondition: any = $state();
+	let currentWeather: any = $state();
 	let loading = $state(false);
+	let loadingCurrent = $state(false);
 	let error = $state('');
 	let geoLocation = $state<GeoLocation | null>(null);
 	let showGlobe = $state(!searchId); // Don't show globe if coming from history
@@ -60,6 +62,55 @@
 		return weatherMap[weather?.toLowerCase()] || '🌤️';
 	}
 
+	// Map Open-Meteo weather codes to our conditions
+	function mapWeatherCode(code: number): string {
+		if (code === 0) return 'sunny';
+		if (code <= 3) return 'partly_cloudy';
+		if (code <= 48) return 'foggy';
+		if (code <= 57) return 'rainy';
+		if (code <= 67) return 'rainy';
+		if (code <= 77) return 'snowy';
+		if (code <= 82) return 'rainy';
+		if (code <= 86) return 'snowy';
+		if (code <= 99) return 'stormy';
+		return 'cloudy';
+	}
+
+	// Get weather description from code
+	function getWeatherDescription(code: number): string {
+		const descriptions: Record<number, string> = {
+			0: 'Clear sky',
+			1: 'Mainly clear',
+			2: 'Partly cloudy',
+			3: 'Overcast',
+			45: 'Fog',
+			48: 'Depositing rime fog',
+			51: 'Light drizzle',
+			53: 'Moderate drizzle',
+			55: 'Dense drizzle',
+			56: 'Light freezing drizzle',
+			57: 'Dense freezing drizzle',
+			61: 'Slight rain',
+			63: 'Moderate rain',
+			65: 'Heavy rain',
+			66: 'Light freezing rain',
+			67: 'Heavy freezing rain',
+			71: 'Slight snow fall',
+			73: 'Moderate snow fall',
+			75: 'Heavy snow fall',
+			77: 'Snow grains',
+			80: 'Slight rain showers',
+			81: 'Moderate rain showers',
+			82: 'Violent rain showers',
+			85: 'Slight snow showers',
+			86: 'Heavy snow showers',
+			95: 'Thunderstorm',
+			96: 'Thunderstorm with slight hail',
+			99: 'Thunderstorm with heavy hail'
+		};
+		return descriptions[code] || 'Unknown conditions';
+	}
+
 	async function fetchWeatherData(location: string, date: string) {
 		if (!location || !date) return;
 
@@ -92,6 +143,53 @@
 		}
 	}
 
+	async function fetchCurrentWeather(location: string) {
+		if (!location) return;
+
+		loadingCurrent = true;
+
+		try {
+			// Get coordinates for the location
+			const coords = await geocodeWithFallback(location);
+			if (!coords) {
+				throw new Error('Could not find coordinates for location');
+			}
+
+			// Use Open-Meteo API for current weather
+			const currentUrl = `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lng}&current=temperature_2m,weather_code&timezone=auto`;
+
+			const response = await fetch(currentUrl);
+			if (!response.ok) {
+				throw new Error(`Current weather API error: ${response.status}`);
+			}
+
+			const data = await response.json();
+
+			if (!data.current) {
+				throw new Error('No current weather data available');
+			}
+
+			const weatherCode = data.current.weather_code;
+			const temperature = Math.round(data.current.temperature_2m);
+
+			currentWeather = {
+				condition: mapWeatherCode(weatherCode),
+				temperature: `${temperature}°C`,
+				description: getWeatherDescription(weatherCode)
+			};
+		} catch (err) {
+			console.error('Error fetching current weather:', err);
+			// Fallback to placeholder data
+			currentWeather = {
+				condition: 'partly_cloudy',
+				temperature: '--°C',
+				description: 'Current weather temporarily unavailable'
+			};
+		} finally {
+			loadingCurrent = false;
+		}
+	}
+
 	$effect(() => {
 		if (location && date) {
 			initializeWeatherFlow();
@@ -120,6 +218,8 @@
 					// Fetch fresh weather data
 					await fetchWeatherData(location, date);
 				}
+				// Also fetch current weather as additional info
+				fetchCurrentWeather(location);
 				return;
 			}
 		}
@@ -149,6 +249,8 @@
 		if (!weatherCondition) {
 			fetchWeatherData(location, date);
 		}
+		// Also fetch current weather as additional info
+		fetchCurrentWeather(location);
 	}
 
 	// Add a fallback timeout in case globe callback doesn't fire
@@ -306,6 +408,44 @@
 										{date}
 									</p>
 								</div>
+							</div>
+
+							<!-- Current Weather Section -->
+							<div
+								class="animate-fade-in mt-6 rounded-lg border border-green-300 bg-green-50 p-4"
+								style="animation-delay: 600ms;"
+							>
+								<h4 class="mb-3 text-lg font-semibold text-green-800">Current Weather</h4>
+								{#if loadingCurrent}
+									<div class="flex items-center justify-center py-4">
+										<div class="mr-3 animate-spin text-2xl">🌀</div>
+										<span class="text-green-700">Loading current conditions...</span>
+									</div>
+								{:else if currentWeather}
+									<div class="flex items-center justify-between">
+										<div class="flex items-center">
+											<div class="mr-3 text-3xl">{getWeatherEmoji(currentWeather.condition)}</div>
+											<div>
+												<p class="font-medium text-green-800 capitalize">
+													{currentWeather.condition?.replace('_', ' ')}
+												</p>
+												<p class="text-sm text-green-600">
+													{currentWeather.description || 'Current conditions'}
+												</p>
+											</div>
+										</div>
+										<div class="text-right">
+											<p class="text-2xl font-bold text-green-800">
+												{currentWeather.temperature || '--°C'}
+											</p>
+											<p class="text-xs text-green-600">Now</p>
+										</div>
+									</div>
+								{:else}
+									<div class="py-2 text-center text-green-600">
+										<p class="text-sm">Current weather data will be available soon</p>
+									</div>
+								{/if}
 							</div>
 						</div>
 					{/if}
