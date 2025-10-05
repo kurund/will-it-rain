@@ -21,7 +21,6 @@ Instead of generic forecasts, the app translates Global Weather Repository data 
 
 - **Custom Query** – Users enter a location (search) and a date.
 - **Weather Risk Categories** – Get a clear probability of extreme or uncomfortable weather.
-- **Interactive UI** – Color-coded indicators and intuitive icons.
 - **Mobile-first Design** – Optimized for both desktop and mobile.
 - **Visual Insights** – Graphs and maps powered by NASA Earth observation data.
 
