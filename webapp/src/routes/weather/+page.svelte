@@ -433,12 +433,6 @@
 													>
 												</div>
 												<div class="flex justify-between">
-													<span class="text-gray-600">Class:</span>
-													<span class="font-medium capitalize"
-														>{transformedWeather.forecast.temperature.class}</span
-													>
-												</div>
-												<div class="flex justify-between">
 													<span class="text-gray-600">Likely range:</span>
 													<span class="font-medium">
 														{transformedWeather.forecast.temperature.range.likely.min}°C - {transformedWeather
@@ -466,12 +460,6 @@
 														>{transformedWeather.forecast.rain.expectedAmount}mm</span
 													>
 												</div>
-												<div class="flex justify-between">
-													<span class="text-gray-600">Class:</span>
-													<span class="font-medium capitalize"
-														>{transformedWeather.forecast.rain.class}</span
-													>
-												</div>
 												<p class="mt-2 text-xs text-gray-500 italic">
 													{transformedWeather.forecast.rain.description}
 												</p>
@@ -488,12 +476,6 @@
 													<span class="text-gray-600">Speed:</span>
 													<span class="font-medium"
 														>{transformedWeather.forecast.wind.speed} km/h</span
-													>
-												</div>
-												<div class="flex justify-between">
-													<span class="text-gray-600">Class:</span>
-													<span class="font-medium capitalize"
-														>{transformedWeather.forecast.wind.class}</span
 													>
 												</div>
 												{#each transformedWeather.forecast.wind.conditions as windCondition}
@@ -531,12 +513,6 @@
 													>
 														{transformedWeather.airQuality.level}
 													</span>
-												</div>
-												<div class="flex justify-between">
-													<span class="text-gray-600">Class:</span>
-													<span class="font-medium capitalize"
-														>{transformedWeather.airQuality.class}</span
-													>
 												</div>
 												<p class="mt-2 text-xs text-gray-500 italic">
 													{transformedWeather.airQuality.description}
