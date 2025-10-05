@@ -6,29 +6,29 @@
 
 ## 🚀 Overview
 
-**Will It Rain On My Parade?** is a web and mobile application that helps users plan outdoor activities by predicting the likelihood of uncomfortable weather conditions.  
+**Will It Rain On My Parade?** is a web and mobile application that helps users plan their holidays by predicting the likelihood of weather conditions.  
 Instead of generic forecasts, the app translates Global Weather Repository data into **personalized risk categories**:
 
-- 🌡️ Very Hot - bring your water bottle 🥵
-- 🧊 Very Cold - wrap up warm ❄️
-- 🌬️ Very Windy - bring a jacket! 🧥
-- ☔ Very Wet - perhaps an umbrella? ☔️
-- 😓 Polluted - remember a facemask! 😷
+- 🌡️ Temperature
+- 🌬️ Wind condition
+- ☔ Precipitation
+- 😷 Air pollution
+- 🌫️ Cloud coverage
 
 ---
 
 ## 🌍 Features
 
 - **Custom Query** – Users enter a location (search) and a date.
-- **Weather Risk Categories** – Get a clear probability of extreme or uncomfortable weather.
 - **Mobile-first Design** – Optimized for both desktop and mobile.
-- **Visual Insights** – Graphs and maps powered by NASA Earth observation data.
+- **Weather Categories** - Temperature, precipitation, wind conditions, air quality, and cloud coverage.
+- **Live coverage** - A current weather update of the location selected by user.
 
 ---
 
 ## 📊 Data Sources
 
-- Global Weather Repository
+- **API** Global Weather Repository
 - **Open-Meteo API:** Real-time weather data and forecasts
 - **OpenStreetMap Nominatim:** Geocoding and location services
 

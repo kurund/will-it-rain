@@ -120,16 +120,29 @@
 		error = '';
 
 		try {
-			// Load locations data to find country
-			const locationsResponse = await fetch('/data/locations.json');
-			const locationsData = await locationsResponse.json();
+			// Parse location to get city and country
+			let city = location;
+			let country = location;
 
-			// Find the country for this location
-			const locationEntry = locationsData.find(
-				(entry: any) => entry.location_name.toLowerCase() === location.toLowerCase()
-			);
+			if (location.includes(', ')) {
+				const parts = location.split(', ');
+				city = parts[0];
+				country = parts[1];
+			} else {
+				// Fallback: load locations data to find country
+				const locationsResponse = await fetch('/data/locations.json');
+				const locationsData = await locationsResponse.json();
 
-			const country = locationEntry ? locationEntry.country : location;
+				const locationEntry = locationsData.find(
+					(entry: any) => entry.location_name.toLowerCase() === location.toLowerCase()
+				);
+
+				if (locationEntry) {
+					city = locationEntry.location_name;
+					country = locationEntry.country;
+				}
+			}
+
 			const backendUrl = import.meta.env.VITE_BACKEND_URL;
 			const response = await fetch(
 				`${backendUrl}/weather?location=${encodeURIComponent(country)}&date=${date}`
