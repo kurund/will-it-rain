@@ -143,7 +143,7 @@ export const HomeScreen: FC = () => {
     return (
       <View>
         <View style={styles.header}>
-          <Text style={styles.title}>Get My Weather</Text>
+          <Text style={styles.title}>Will It Rain?</Text>
           <Image source={Logo} width={100} style={styles.logo} />
         </View>
 
@@ -244,6 +244,7 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 24,
+    fontWeight: '700',
   },
 
   dropdown: {
