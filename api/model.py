@@ -212,7 +212,7 @@ def model(GWR, country, date_str, sigma_days=15):
 
     summary = {
         "Country": country,
-        "Date": date.date(),
+        "Date": date.date().isoformat(),
         "Pred_Temp_C": round(pred_temp_c, 1),
         "Temp_likely_min_C": round(temp_p50[0], 1),
         "Temp_likely_max_C": round(temp_p50[1], 1),
