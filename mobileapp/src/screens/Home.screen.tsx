@@ -70,7 +70,7 @@ export const HomeScreen: FC = () => {
   const [prediction, setPrediction] = useState<Prediction>();
 
   useEffect(() => {
-    setFriendlyDate(date.toDateString());
+    setFriendlyDate(date.toLocaleDateString());
   }, [date]);
 
   const getPrediction = async () => {
@@ -181,11 +181,7 @@ export const HomeScreen: FC = () => {
 
         <View style={styles.datePicker}>
           <Button
-            title={
-              date
-                ? `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`
-                : 'Choose date'
-            }
+            title={date ? `${date.toLocaleDateString()}` : 'Choose date'}
             onPress={() => setOpen(true)}
           />
           <DatePicker
