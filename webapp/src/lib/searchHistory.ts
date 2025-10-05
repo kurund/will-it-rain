@@ -29,7 +29,7 @@ export function addSearchToHistory(
 ): string {
 	if (typeof window === 'undefined') return '';
 
-	const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+	const id = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 	const newSearch: SearchHistoryItem = {
 		id,
 		location,
