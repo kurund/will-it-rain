@@ -42,5 +42,9 @@
 		"onlyBuiltDependencies": [
 			"esbuild"
 		]
+	},
+	"dependencies": {
+		"globe.gl": "^2.44.0",
+		"three": "^0.180.0"
 	}
 }

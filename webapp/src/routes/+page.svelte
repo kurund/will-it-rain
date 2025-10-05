@@ -16,12 +16,11 @@
 
 		if (location.trim() && date) {
 			// Save to search history
-			const searchId = addSearchToHistory(location.trim(), date);
+			addSearchToHistory(location.trim(), date);
 
 			const params = new URLSearchParams({
 				location: location.trim(),
-				date,
-				searchId
+				date
 			});
 			goto(`/weather?${params.toString()}`);
 		}
