@@ -62,7 +62,7 @@
 
 	// Handle location selection
 	function selectLocation(selectedLocation: { country: string; location_name: string }) {
-		location = `${selectedLocation.location_name}, ${selectedLocation.country}`;
+		location = `${selectedLocation.location_name}`;
 		searchTerm = location;
 		showDropdown = false;
 	}

@@ -119,9 +119,19 @@
 		error = '';
 
 		try {
+			// Load locations data to find country
+			const locationsResponse = await fetch('/data/locations.json');
+			const locationsData = await locationsResponse.json();
+
+			// Find the country for this location
+			const locationEntry = locationsData.find(
+				(entry: any) => entry.location_name.toLowerCase() === location.toLowerCase()
+			);
+
+			const country = locationEntry ? locationEntry.country : location;
 			const backendUrl = import.meta.env.VITE_BACKEND_URL;
 			const response = await fetch(
-				`${backendUrl}/weather?location=${encodeURIComponent(location)}&date=${date}`
+				`${backendUrl}/weather?location=${encodeURIComponent(country)}&date=${date}`
 			);
 
 			if (!response.ok) {
