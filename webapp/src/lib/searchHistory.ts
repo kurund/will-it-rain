@@ -6,6 +6,7 @@ export interface SearchHistoryItem {
 	weatherResult?: {
 		weather: string;
 		probability: number;
+		airQuality: string;
 		date: string;
 	};
 }
