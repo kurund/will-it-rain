@@ -1,7 +1,6 @@
 <script lang="ts">
 	import logo from '$lib/assets/clear-logo.gif';
 	import { goto } from '$app/navigation';
-	import { addSearchToHistory } from '$lib/searchHistory';
 
 	let location = $state('');
 	let date = $state('');
@@ -21,9 +20,6 @@
 		);
 
 		if (location.trim() && date && isValidLocation) {
-			// Save to search history
-			addSearchToHistory(location.trim(), date);
-
 			const params = new URLSearchParams({
 				location: location.trim(),
 				date

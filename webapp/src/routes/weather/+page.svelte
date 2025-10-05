@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { getSearchHistory } from '$lib/searchHistory';
+	import { getSearchHistory, addSearchToHistory } from '$lib/searchHistory';
 	import { geocodeWithFallback, type GeoLocation } from '$lib/geocoding';
 	import { transformWeatherData, type TransformedWeatherData } from '$lib/weatherTransform';
 	import Globe from '$lib/components/Globe.svelte';
@@ -154,6 +154,11 @@
 
 			const data = await response.json();
 			transformedWeather = transformWeatherData(data);
+
+			// Save weather result to search history (only for new searches, not from history)
+			if (!searchId && transformedWeather) {
+				addSearchToHistory(location, date, transformedWeather);
+			}
 		} catch (err) {
 			console.error('Error fetching weather data:', err);
 			error = err instanceof Error ? err.message : 'Failed to fetch weather data';

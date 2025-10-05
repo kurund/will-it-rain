@@ -3,12 +3,7 @@ export interface SearchHistoryItem {
 	location: string;
 	date: string;
 	timestamp: number;
-	weatherResult?: {
-		weather: string;
-		probability: number;
-		airQuality: string;
-		date: string;
-	};
+	weatherResult?: any; // Store the entire transformedWeather object
 }
 
 const STORAGE_KEY = 'weather_search_history';
@@ -25,7 +20,7 @@ export function getSearchHistory(): SearchHistoryItem[] {
 	}
 }
 
-export function addSearchToHistory(location: string, date: string): string {
+export function addSearchToHistory(location: string, date: string, weatherResult?: any): string {
 	if (typeof window === 'undefined') return '';
 
 	const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -33,7 +28,8 @@ export function addSearchToHistory(location: string, date: string): string {
 		id,
 		location,
 		date,
-		timestamp: Date.now()
+		timestamp: Date.now(),
+		...(weatherResult && { weatherResult })
 	};
 
 	try {

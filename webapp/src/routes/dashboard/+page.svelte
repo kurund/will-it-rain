@@ -132,7 +132,7 @@
 									<div class="flex items-center gap-3">
 										<div class="text-2xl">
 											{#if item.weatherResult}
-												{getWeatherEmoji(item.weatherResult.weather)}
+												{getWeatherEmoji(item.weatherResult.summary?.weather)}
 											{:else}
 												🌤️
 											{/if}
@@ -144,7 +144,7 @@
 											</p>
 											{#if item.weatherResult}
 												<p class="text-sm font-medium text-blue-600">
-													Rain probability: {item.weatherResult.probability}%
+													Rain probability: {item.weatherResult.forecast?.rain?.probability}%
 												</p>
 											{/if}
 										</div>
