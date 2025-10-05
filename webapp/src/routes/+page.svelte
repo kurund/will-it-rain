@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	import logo from '$lib/assets/clear-logo.gif';
 	import { goto } from '$app/navigation';
 	import { addSearchToHistory } from '$lib/searchHistory';
@@ -85,26 +84,6 @@
 			floatingClouds = true;
 		}, 500);
 	});
-
-	// Weather emojis that change randomly
-	// const weatherEmojis = ['🌤️', '☀️', '⛅', '🌧️', '⛈️', '🌈', '❄️', '🌪️'];
-	const weatherEmojis = [
-  '/Users/maura/will-it-rain-1/webapp/static/images/clear-logo.gif',   // 
-];
-
-	let currentEmoji = $state(weatherEmojis[0]);
-
-	function rotateEmoji() {
-		const randomIndex = Math.floor(Math.random() * weatherEmojis.length);
-		currentEmoji = weatherEmojis[randomIndex];
-	}
-
-
-	// Auto-rotate emoji every 3 seconds
-	$effect(() => {
-		const interval = setInterval(rotateEmoji, 3000);
-		return () => clearInterval(interval);
-	});
 </script>
 
 <div
@@ -187,15 +166,16 @@
 				</button>
 			</div>
 
-			<!-- Animated weather icon -->
-			<div
-				class="mb-4 transform cursor-pointer text-8xl transition-all duration-500 hover:scale-110"
-				onclick={rotateEmoji}
-				role="button"
-				tabindex="0"
-				onkeydown={(e) => e.key === 'Enter' && rotateEmoji()}
-			>
-				<img width="300" alt="The project logo" src={logo} />
+			<!-- Logo -->
+			<div class="mb-4 flex justify-center">
+				<div class="overflow-hidden" style="height: 180px; width: 300px;">
+					<img
+						width="300"
+						alt="The project logo"
+						src={logo}
+						style="margin-top: -80px; margin-bottom: -80px;"
+					/>
+				</div>
 			</div>
 
 			<h1
@@ -284,13 +264,6 @@
 				<span class="flex items-center justify-center"> ✈️ Plan My Trip </span>
 			</button>
 		</form>
-
-		<!-- Fun fact section -->
-		<div class="mt-8 rounded-xl border border-blue-100 bg-blue-50 p-4">
-			<p class="text-center text-sm text-blue-800">
-				💡 <strong>Fun fact:</strong> Click the weather icon above to see different weather types!
-			</p>
-		</div>
 	</div>
 </div>
 
