@@ -4,12 +4,17 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 interface Props {
   title: string;
   onPress: () => void;
+  disabled?: boolean;
   style?: any;
 }
 
-export const Button: FC<Props> = ({ title, onPress, style }) => {
+export const Button: FC<Props> = ({ title, onPress, disabled, style }) => {
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled}
+      style={disabled ? styles.disabled : {}}
+    >
       <View style={[styles.main, style]}>
         <Text style={styles.title}>{title}</Text>
       </View>
@@ -29,5 +34,9 @@ const styles = StyleSheet.create({
   title: {
     color: '#ffffff',
     fontSize: 18,
+  },
+
+  disabled: {
+    opacity: 0.3,
   },
 });
