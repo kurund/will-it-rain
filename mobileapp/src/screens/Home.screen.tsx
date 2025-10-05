@@ -1,5 +1,12 @@
 import { FC, useState } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import DatePicker from 'react-native-date-picker';
 import { Dropdown } from 'react-native-element-dropdown';
@@ -7,6 +14,8 @@ import { locations } from '../data/locations';
 import { getWeather } from '../services/weather';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { Button } from '../components/Button';
+
+import Logo from '../assets/images/logo.gif';
 
 interface Prediction {
   Country: string;
@@ -27,6 +36,15 @@ interface Prediction {
   AQ_High_pct: number;
   AQ_VeryHigh_pct: number;
   Pred_AQ_Index: number;
+  Pred_Wind_kph: number;
+  Pred_FeelsLike_C: number;
+  Pred_Cloud_pct: number;
+  Pred_Condition: string;
+  Pred_Temp_Class: string;
+  Pred_Wind_Class: string;
+  Pred_Wet_Class: string;
+  Pred_AQ_Class: number;
+  Pred_Headline: string;
 }
 
 const data = locations
@@ -79,67 +97,75 @@ export const HomeScreen: FC = () => {
           fill="url(#grad)"
         />
       </Svg>
-      <Text style={styles.title}>Get My Weather</Text>
 
-      <Dropdown
-        style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        iconStyle={styles.iconStyle}
-        data={data}
-        search
-        maxHeight={300}
-        labelField="label"
-        valueField="value"
-        placeholder={!isFocus ? 'Select item' : '...'}
-        searchPlaceholder="Search..."
-        value={location}
-        onFocus={() => setIsFocus(true)}
-        onBlur={() => setIsFocus(false)}
-        onChange={item => {
-          setLocation(item.value);
-          setIsFocus(false);
-        }}
-        // renderLeftIcon={() => (
-        //   <AntDesign
-        //     style={styles.icon}
-        //     color={isFocus ? 'blue' : 'black'}
-        //     name="Safety"
-        //     size={20}
-        //   />
-        // )}
-      />
+      <ScrollView>
+        <View style={styles.header}>
+          <Text style={styles.title}>Get My Weather</Text>
 
-      <Button title="Choose date" onPress={() => setOpen(true)} />
-      <DatePicker
-        modal
-        open={open}
-        date={date}
-        mode="date"
-        onConfirm={date => {
-          setOpen(false);
-          setDate(date);
-        }}
-        onCancel={() => {
-          setOpen(false);
-        }}
-      />
-
-      <Button title="Get prediction" onPress={getPrediction} />
-
-      {prediction ? (
-        <View>
-          <Text style={styles.predictionText}>
-            Temp: {prediction.Pred_Temp_C}C
-          </Text>
-          <Text style={styles.predictionText}>
-            Rain: {prediction.Pred_Rain_mm}mm
-          </Text>
+          <Image source={Logo} width={100} style={styles.logo} />
         </View>
-      ) : (
-        <></>
-      )}
+
+        <Dropdown
+          style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={data}
+          search
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={!isFocus ? 'Select item' : '...'}
+          searchPlaceholder="Search..."
+          value={location}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={item => {
+            setLocation(item.value);
+            setIsFocus(false);
+          }}
+          // renderLeftIcon={() => (
+          //   <AntDesign
+          //     style={styles.icon}
+          //     color={isFocus ? 'blue' : 'black'}
+          //     name="Safety"
+          //     size={20}
+          //   />
+          // )}
+        />
+
+        <Button title="Choose date" onPress={() => setOpen(true)} />
+        <DatePicker
+          modal
+          open={open}
+          date={date}
+          mode="date"
+          onConfirm={date => {
+            setOpen(false);
+            setDate(date);
+          }}
+          onCancel={() => {
+            setOpen(false);
+          }}
+        />
+
+        <Button title="Get prediction" onPress={getPrediction} />
+
+        {prediction ? (
+          <View>
+            <Text>{JSON.stringify(prediction)}</Text>
+            <Text style={styles.predictionText}>
+              Temp: {prediction.Pred_Temp_C}C
+            </Text>
+            <Text style={styles.predictionText}>
+              Rain: {prediction.Pred_Rain_mm}mm
+            </Text>
+          </View>
+        ) : (
+          <></>
+        )}
+      </ScrollView>
     </View>
   );
 };
@@ -160,6 +186,8 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderRadius: 8,
     paddingHorizontal: 8,
+    backgroundColor: '#fff',
+    marginTop: 20,
   },
 
   placeholderStyle: {
@@ -186,5 +214,17 @@ const styles = StyleSheet.create({
     fontSize: 32,
     textAlign: 'center',
     margin: 20,
+  },
+
+  header: {
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    padding: 20,
+    alignItems: 'center',
+  },
+
+  logo: {
+    width: SCREEN_WIDTH - 80,
+    height: 200,
   },
 });
