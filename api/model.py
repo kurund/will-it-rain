@@ -161,15 +161,14 @@ def model(GWR, country, date_str, sigma_days=15):
     prob_windy = wtd_mean(((wind >= 28) & (wind < 55)).astype(int), w)
     prob_gale = wtd_mean((wind >= 55).astype(int), w)
     pred_wind_kph = wtd_mean(wind, w)
-    prob_very_high = wtd_mean((aq >= 10).astype(int), w)
 
     # --- Air Quality ---
     aq = df["air_quality_gb-defra-index"].values
     prob_low = wtd_mean(((aq >= 1) & (aq <= 3)).astype(int), w)
     prob_moderate = wtd_mean(((aq >= 4) & (aq <= 6)).astype(int), w)
     prob_high = wtd_mean(((aq >= 7) & (aq <= 9)).astype(int), w)
-    prob_veryhigh = wtd_mean((aq >= 10).astype(int), w)
     pred_aq_index = wtd_mean(aq, w)
+    prob_very_high = wtd_mean((aq >= 10).astype(int), w)
 
     # --- Feels-like & Cloud (for descriptives) ---
     pred_feels_c = (
