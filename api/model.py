@@ -204,7 +204,7 @@ def model(GWR, country, date_str, sigma_days=15):
     if wet_cls and wet_cls != "Dry":
         parts.append(wet_cls.lower())
     headline_core = ", ".join(parts) if parts else "Typical"
-    aq_tail = f" — {aq_cls.lower()} air quality" if isinstance(aq_cls, str) else ""
+    aq_tail = f" — {aq_cls.lower()} air pollution" if isinstance(aq_cls, str) else ""
     cloud_tail = f". Likely: {cloud_phrase}" if isinstance(cloud_phrase, str) else ""
     cond_tail = f" ({pred_condition})" if isinstance(pred_condition, str) else ""
 
