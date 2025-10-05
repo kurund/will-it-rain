@@ -1,4 +1,6 @@
 <script lang="ts">
+
+	import logo from '$lib/assets/clear-logo.gif';
 	import { goto } from '$app/navigation';
 	import { addSearchToHistory } from '$lib/searchHistory';
 
@@ -85,13 +87,18 @@
 	});
 
 	// Weather emojis that change randomly
-	const weatherEmojis = ['🌤️', '☀️', '⛅', '🌧️', '⛈️', '🌈', '❄️', '🌪️'];
+	// const weatherEmojis = ['🌤️', '☀️', '⛅', '🌧️', '⛈️', '🌈', '❄️', '🌪️'];
+	const weatherEmojis = [
+  '/Users/maura/will-it-rain-1/webapp/static/images/clear-logo.gif',   // 
+];
+
 	let currentEmoji = $state(weatherEmojis[0]);
 
 	function rotateEmoji() {
 		const randomIndex = Math.floor(Math.random() * weatherEmojis.length);
 		currentEmoji = weatherEmojis[randomIndex];
 	}
+
 
 	// Auto-rotate emoji every 3 seconds
 	$effect(() => {
@@ -188,7 +195,7 @@
 				tabindex="0"
 				onkeydown={(e) => e.key === 'Enter' && rotateEmoji()}
 			>
-				{currentEmoji}
+				<img width="300" alt="The project logo" src={logo} />
 			</div>
 
 			<h1
