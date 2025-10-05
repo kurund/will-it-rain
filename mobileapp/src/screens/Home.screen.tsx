@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -60,6 +60,7 @@ const SCREEN_WIDTH = Dimensions.get('screen').width;
 export const HomeScreen: FC = () => {
   // Date
   const [date, setDate] = useState(new Date());
+  const [friendlyDate, setFriendlyDate] = useState<string>('');
   const [open, setOpen] = useState(false);
 
   // Location
@@ -67,6 +68,10 @@ export const HomeScreen: FC = () => {
   const [isFocus, setIsFocus] = useState(false);
 
   const [prediction, setPrediction] = useState<Prediction>();
+
+  useEffect(() => {
+    setFriendlyDate(date.toDateString());
+  }, [date]);
 
   const getPrediction = async () => {
     const _prediction = await getWeather(
@@ -88,11 +93,23 @@ export const HomeScreen: FC = () => {
         <View>
           <View>
             {/* <Text>{JSON.stringify(prediction)}</Text> */}
+
+            <Text style={styles.country}>{prediction.Country}</Text>
+            <Text style={styles.date}>{friendlyDate}</Text>
+
+            <View style={styles.predictionHeadlineContainer}>
+              <Text style={styles.predictionHeadline}>
+                {prediction.Pred_Headline}
+              </Text>
+            </View>
             <Text style={styles.predictionText}>
-              Temp: {prediction.Pred_Temp_C}C
+              Temp: {prediction.Pred_Temp_C}°C
             </Text>
             <Text style={styles.predictionText}>
               Rain: {prediction.Pred_Rain_mm}mm
+            </Text>
+            <Text style={styles.predictionText}>
+              Wind: {prediction.Pred_Wind_kph}kph
             </Text>
           </View>
           <Button title="Plan Another Trip" onPress={reset} />
@@ -104,7 +121,6 @@ export const HomeScreen: FC = () => {
       <View>
         <View style={styles.header}>
           <Text style={styles.title}>Get My Weather</Text>
-
           <Image source={Logo} width={100} style={styles.logo} />
         </View>
 
@@ -240,11 +256,23 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 
+  predictionHeadlineContainer: {
+    backgroundColor: '#fff9',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+  },
+  predictionHeadline: {
+    // color: '#fff',
+    fontSize: 18,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+
   predictionText: {
     color: '#fff',
-    fontSize: 32,
-    textAlign: 'center',
-    margin: 20,
+    fontSize: 24,
+    margin: 10,
   },
 
   header: {
@@ -261,5 +289,19 @@ const styles = StyleSheet.create({
 
   datePicker: {
     marginTop: 20,
+  },
+
+  country: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 20,
+  },
+
+  date: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 20,
   },
 });

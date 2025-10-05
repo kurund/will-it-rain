@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 2,
     borderColor: '#fff',
+    marginTop: 40,
     marginBottom: 10,
     borderRadius: 20,
   },
@@ -34,6 +35,7 @@ const styles = StyleSheet.create({
   title: {
     color: '#ffffff',
     fontSize: 18,
+    textAlign: 'center',
   },
 
   disabled: {
