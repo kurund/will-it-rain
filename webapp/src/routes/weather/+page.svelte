@@ -392,12 +392,15 @@
 									<div class="mb-4 text-6xl">
 										{transformedWeather.summary.emoji}
 									</div>
-									<h3 class="mb-6 text-xl font-semibold text-gray-800">
-										{transformedWeather.summary.condition} Weather
+									<h3 class="mb-2 text-xl font-semibold text-gray-800">
+										{transformedWeather.summary.condition}
 									</h3>
+									<p class="mb-6 text-sm text-gray-600 italic">
+										{transformedWeather.summary.headline}
+									</p>
 
 									<!-- Detailed Weather Information -->
-									<div class="grid gap-4 md:grid-cols-2">
+									<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 										<!-- Temperature Details -->
 										<div class="rounded-lg bg-white p-4 shadow-sm">
 											<h4 class="mb-3 flex items-center text-lg font-semibold text-gray-800">
@@ -411,17 +414,22 @@
 													>
 												</div>
 												<div class="flex justify-between">
+													<span class="text-gray-600">Feels like:</span>
+													<span class="font-medium"
+														>{transformedWeather.forecast.temperature.feelsLike}°C</span
+													>
+												</div>
+												<div class="flex justify-between">
+													<span class="text-gray-600">Class:</span>
+													<span class="font-medium capitalize"
+														>{transformedWeather.forecast.temperature.class}</span
+													>
+												</div>
+												<div class="flex justify-between">
 													<span class="text-gray-600">Likely range:</span>
 													<span class="font-medium">
 														{transformedWeather.forecast.temperature.range.likely.min}°C - {transformedWeather
 															.forecast.temperature.range.likely.max}°C
-													</span>
-												</div>
-												<div class="flex justify-between">
-													<span class="text-gray-600">Possible range:</span>
-													<span class="font-medium">
-														{transformedWeather.forecast.temperature.range.possible.min}°C - {transformedWeather
-															.forecast.temperature.range.possible.max}°C
 													</span>
 												</div>
 											</div>
@@ -445,6 +453,12 @@
 														>{transformedWeather.forecast.rain.expectedAmount}mm</span
 													>
 												</div>
+												<div class="flex justify-between">
+													<span class="text-gray-600">Class:</span>
+													<span class="font-medium capitalize"
+														>{transformedWeather.forecast.rain.class}</span
+													>
+												</div>
 												<p class="mt-2 text-xs text-gray-500 italic">
 													{transformedWeather.forecast.rain.description}
 												</p>
@@ -457,6 +471,18 @@
 												💨 Wind Conditions
 											</h4>
 											<div class="space-y-2 text-sm">
+												<div class="flex justify-between">
+													<span class="text-gray-600">Speed:</span>
+													<span class="font-medium"
+														>{transformedWeather.forecast.wind.speed} km/h</span
+													>
+												</div>
+												<div class="flex justify-between">
+													<span class="text-gray-600">Class:</span>
+													<span class="font-medium capitalize"
+														>{transformedWeather.forecast.wind.class}</span
+													>
+												</div>
 												{#each transformedWeather.forecast.wind.conditions as windCondition}
 													<div class="flex justify-between">
 														<span class="text-gray-600">{windCondition.type}:</span>
@@ -472,7 +498,7 @@
 										<!-- Air Quality Details -->
 										<div class="rounded-lg bg-white p-4 shadow-sm">
 											<h4 class="mb-3 flex items-center text-lg font-semibold text-gray-800">
-												🌫️ Air Quality
+												🌫️ Air Pollution
 											</h4>
 											<div class="space-y-2 text-sm">
 												<div class="flex justify-between">
@@ -493,8 +519,32 @@
 														{transformedWeather.airQuality.level}
 													</span>
 												</div>
+												<div class="flex justify-between">
+													<span class="text-gray-600">Class:</span>
+													<span class="font-medium capitalize"
+														>{transformedWeather.airQuality.class}</span
+													>
+												</div>
 												<p class="mt-2 text-xs text-gray-500 italic">
 													{transformedWeather.airQuality.description}
+												</p>
+											</div>
+										</div>
+
+										<!-- Cloud Coverage Details -->
+										<div class="rounded-lg bg-white p-4 shadow-sm">
+											<h4 class="mb-3 flex items-center text-lg font-semibold text-gray-800">
+												☁️ Cloud Coverage
+											</h4>
+											<div class="space-y-2 text-sm">
+												<div class="flex justify-between">
+													<span class="text-gray-600">Coverage:</span>
+													<span class="font-medium"
+														>{transformedWeather.forecast.clouds.coverage}%</span
+													>
+												</div>
+												<p class="mt-2 text-xs text-gray-500 italic">
+													{transformedWeather.forecast.clouds.description}
 												</p>
 											</div>
 										</div>
