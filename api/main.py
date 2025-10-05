@@ -43,7 +43,7 @@ weather_categories = [
 
 def get_result(location: str, date: str):
     request_date = datetime.datetime.now().date().isoformat()
-    cache_key = f"{request_date}_{date}"
+    cache_key = f"{request_date}_{date}_{location}"
 
     if cache_key in cache.keys():
         return json.loads(cache[cache_key])
