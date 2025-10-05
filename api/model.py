@@ -1,13 +1,11 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from scipy.stats import norm
 
-# --- Load and prepare data ---
+
 GWR = pd.read_csv("GlobalWeatherRepository.csv", parse_dates=["last_updated"])
 
 
-# Add month and season columns
 def get_season(month):
     if month in [12, 1, 2]:
         return "Winter"
@@ -28,24 +26,25 @@ GWR["season"] = pd.Categorical(
 )
 
 
-# --- Define model function ---
 def model(GWR, country, date_str, sigma_days=15):
-    from datetime import timedelta
-
     def gaussian_weights(dates, target_date, sigma_days=15):
         doy = dates.dt.dayofyear
         target = target_date.timetuple().tm_yday
         delta = np.abs(doy - target)
-        delta = np.minimum(delta, 365 - delta)
+        delta = np.minimum(delta, 365 - delta)  # 年跨ぎを考慮
         return np.exp(-(delta**2) / (2 * sigma_days**2))
 
-    def weighted_mean(x, w):
+    def wtd_mean(x, w):
+        x = np.asarray(x, dtype=float)
+        w = np.asarray(w, dtype=float)
         mask = np.isfinite(x) & np.isfinite(w)
         if not np.any(mask):
             return np.nan
         return np.sum(w[mask] * x[mask]) / np.sum(w[mask])
 
-    def weighted_quantiles(x, w, probs=[0.25, 0.75]):
+    def wtd_quantiles(x, w, probs=[0.25, 0.75]):
+        x = np.asarray(x, dtype=float)
+        w = np.asarray(w, dtype=float)
         mask = np.isfinite(x) & np.isfinite(w)
         x = x[mask]
         w = w[mask]
@@ -54,8 +53,86 @@ def model(GWR, country, date_str, sigma_days=15):
         order = np.argsort(x)
         x = x[order]
         w = np.array(w)[order]
-        cumulative_weights = np.cumsum(w) / np.sum(w)
-        return [x[np.searchsorted(cumulative_weights, p)] for p in probs]
+        cw = np.cumsum(w) / np.sum(w)
+        return [x[np.searchsorted(cw, p)] for p in probs]
+
+    # weighted mode for condition_text
+    def weighted_mode(values, weights):
+        dfm = pd.DataFrame({"v": values, "w": weights})
+        if dfm.empty or dfm["w"].sum() == 0:
+            return np.nan
+        grp = dfm.groupby("v", dropna=False)["w"].sum()
+        if grp.empty:
+            return np.nan
+        return grp.idxmax()
+
+    # --- descriptive mappers ---
+    def temp_class_c(t):
+        if not np.isfinite(t):
+            return np.nan
+        if t <= 0:
+            return "Freezing"
+        if t <= 7:
+            return "Cold"
+        if t <= 15:
+            return "Cool"
+        if t <= 22:
+            return "Mild"
+        if t <= 28:
+            return "Warm"
+        return "Hot"
+
+    def wind_class_kph(k):
+        if not np.isfinite(k):
+            return np.nan
+        if k < 12:
+            return "Calm/Light"
+        if k < 20:
+            return "Light Breeze"
+        if k < 28:
+            return "Breezy"
+        if k < 39:
+            return "Windy"
+        if k < 55:
+            return "Strong Breeze"
+        return "Gale"
+
+    def wet_class_mm(mm):
+        if not np.isfinite(mm) or mm <= 0:
+            return "Dry"
+        if mm < 0.2:
+            return "Drizzle"
+        if mm < 1.0:
+            return "Light Rain"
+        if mm < 5.0:
+            return "Moderate Rain"
+        if mm < 20.0:
+            return "Heavy Rain"
+        return "Very Heavy Rain"
+
+    def aq_class_defra(aqi):
+        if not np.isfinite(aqi):
+            return np.nan
+        if 1 <= aqi <= 3:
+            return "Low"
+        if 4 <= aqi <= 6:
+            return "Moderate"
+        if 7 <= aqi <= 9:
+            return "High"
+        if aqi >= 10:
+            return "Very High"
+        return np.nan
+
+    def cloud_desc(pct):
+        if not np.isfinite(pct):
+            return None
+        if pct < 20:
+            return "clear"
+        if pct < 50:
+            return "partly cloudy"
+        if pct < 80:
+            return "mostly cloudy"
+        return "overcast"
 
     df = GWR[GWR["country"] == country].copy()
     if df.empty:
@@ -66,35 +143,76 @@ def model(GWR, country, date_str, sigma_days=15):
 
     w = gaussian_weights(df["date"], date, sigma_days)
 
-    # Temperature
+    # --- Temperature ---
     temp = df["temperature_celsius"].values
-    pred_temp_c = weighted_mean(temp, w)
-    temp_p50 = weighted_quantiles(temp, w, [0.25, 0.75])
-    temp_p90 = weighted_quantiles(temp, w, [0.05, 0.95])
+    pred_temp_c = wtd_mean(temp, w)
+    temp_p50 = wtd_quantiles(temp, w, [0.25, 0.75])
+    temp_p90 = wtd_quantiles(temp, w, [0.05, 0.95])
 
-    # Rain
+    # --- Rain ---
     rain_ind = (df["precip_mm"] > 0).astype(int)
-    prob_rain = weighted_mean(rain_ind, w)
-    rain_mm = weighted_mean(df["precip_mm"].values, w)
+    prob_rain = wtd_mean(rain_ind, w)
+    rain_mm = wtd_mean(df["precip_mm"].values, w)
 
-    # Wind
-    wind = df["wind_kph"]
-    prob_calm = weighted_mean((wind < 12).astype(int), w)
-    prob_light_breeze = weighted_mean(((wind >= 12) & (wind < 28)).astype(int), w)
-    prob_windy = weighted_mean(((wind >= 28) & (wind < 55)).astype(int), w)
-    prob_gale = weighted_mean((wind >= 55).astype(int), w)
+    # --- Wind ---
+    wind = df["wind_kph"].values
+    prob_calm = wtd_mean((wind < 12).astype(int), w)
+    prob_lightbreeze = wtd_mean(((wind >= 12) & (wind < 28)).astype(int), w)
+    prob_windy = wtd_mean(((wind >= 28) & (wind < 55)).astype(int), w)
+    prob_gale = wtd_mean((wind >= 55).astype(int), w)
+    pred_wind_kph = wtd_mean(wind, w)
 
-    # Air Quality
-    aq = df["air_quality_gb-defra-index"]
-    prob_low = weighted_mean(((aq >= 1) & (aq <= 3)).astype(int), w)
-    prob_moderate = weighted_mean(((aq >= 4) & (aq <= 6)).astype(int), w)
-    prob_high = weighted_mean(((aq >= 7) & (aq <= 9)).astype(int), w)
-    prob_very_high = weighted_mean((aq >= 10).astype(int), w)
-    pred_aq_index = weighted_mean(aq.values, w)
+    # --- Air Quality ---
+    aq = df["air_quality_gb-defra-index"].values
+    prob_low = wtd_mean(((aq >= 1) & (aq <= 3)).astype(int), w)
+    prob_moderate = wtd_mean(((aq >= 4) & (aq <= 6)).astype(int), w)
+    prob_high = wtd_mean(((aq >= 7) & (aq <= 9)).astype(int), w)
+    prob_veryhigh = wtd_mean((aq >= 10).astype(int), w)
+    pred_aq_index = wtd_mean(aq, w)
+
+    # --- Feels-like & Cloud (for descriptives) ---
+    pred_feels_c = (
+        wtd_mean(df["feels_like_celsius"].values, w)
+        if "feels_like_celsius" in df.columns
+        else np.nan
+    )
+    pred_cloud_pct = (
+        wtd_mean(df["cloud"].values, w) if "cloud" in df.columns else np.nan
+    )
+
+    # --- Predicted condition_text via weighted mode ---
+    pred_condition = (
+        weighted_mode(df["condition_text"], w)
+        if "condition_text" in df.columns
+        else np.nan
+    )
+
+    # --- Classes & headline ---
+    t_for_feel = pred_feels_c if np.isfinite(pred_feels_c) else pred_temp_c
+    temp_cls = temp_class_c(t_for_feel)
+    wind_cls = wind_class_kph(pred_wind_kph)
+    wet_cls = wet_class_mm(rain_mm)
+    aq_cls = aq_class_defra(pred_aq_index)
+    cloud_phrase = cloud_desc(pred_cloud_pct)
+
+    # Build a concise, human-friendly headline
+    parts = []
+    if temp_cls:
+        parts.append(temp_cls)
+    if wind_cls and wind_cls not in ["Calm/Light", None]:
+        parts.append(wind_cls.lower())
+    if wet_cls and wet_cls != "Dry":
+        parts.append(wet_cls.lower())
+    headline_core = ", ".join(parts) if parts else "Typical"
+    aq_tail = f" — {aq_cls.lower()} air quality" if isinstance(aq_cls, str) else ""
+    cloud_tail = f". Likely: {cloud_phrase}" if isinstance(cloud_phrase, str) else ""
+    cond_tail = f" ({pred_condition})" if isinstance(pred_condition, str) else ""
+
+    pred_headline = f"{headline_core}{aq_tail}{cloud_tail}{cond_tail}"
 
     summary = {
         "Country": country,
-        "Date": date.date().isoformat(),
+        "Date": date.date(),
         "Pred_Temp_C": round(pred_temp_c, 1),
         "Temp_likely_min_C": round(temp_p50[0], 1),
         "Temp_likely_max_C": round(temp_p50[1], 1),
@@ -103,24 +221,42 @@ def model(GWR, country, date_str, sigma_days=15):
         "Prob_Rain_pct": round(100 * prob_rain, 1),
         "Pred_Rain_mm": round(rain_mm, 2),
         "Prob_Calm_pct": round(100 * prob_calm, 1),
-        "Prob_LightBreeze_pct": round(100 * prob_light_breeze, 1),
+        "Prob_LightBreeze_pct": round(100 * prob_lightbreeze, 1),
         "Prob_Windy_pct": round(100 * prob_windy, 1),
         "Prob_Gale_pct": round(100 * prob_gale, 1),
-        "AQ_Low_pct": round(100 * prob_low, 1),
-        "AQ_Moderate_pct": round(100 * prob_moderate, 1),
-        "AQ_High_pct": round(100 * prob_high, 1),
-        "AQ_VeryHigh_pct": round(100 * prob_very_high, 1),
+        "Pred_Wind_kph": (
+            None if not np.isfinite(pred_wind_kph) else round(pred_wind_kph, 1)
+        ),
         "Pred_AQ_Index": round(pred_aq_index, 1),
+        "Pred_FeelsLike_C": (
+            None if not np.isfinite(t_for_feel) else round(t_for_feel, 1)
+        ),
+        "Pred_Cloud_pct": (
+            None if not np.isfinite(pred_cloud_pct) else round(pred_cloud_pct, 0)
+        ),
+        "Pred_Condition": pred_condition,  # weighted mode of condition_text
+        "Pred_Temp_Class": temp_cls,
+        "Pred_Wind_Class": wind_cls,
+        "Pred_Wet_Class": wet_cls,
+        "Pred_AQ_Class": aq_cls,
+        "Pred_Headline": pred_headline,  # readable one-liner
     }
+
+    return summary
 
     # summary_wide = pd.DataFrame([summary])
 
-    # summary_long = summary_wide.melt(
-    #     id_vars=["Country", "Date"], var_name="Metric", value_name="Value"
-    # )
+    # summary_long = summary_wide.melt(id_vars=["Country", "Date"], var_name="Metric", value_name="Value")
 
-    # return {"summary_wide": summary_wide, "summary_long": summary_long}
-    return summary
+    # return {
+    #     "summary_wide": summary_wide,
+    #     "summary_long": summary_long
+    # }
+
+
+# res = model(GWR, "United Kingdom", "2025-07-07")
+# print(res["summary_wide"])
+# print(res["summary_long"])
 
 
 def get_prediction(country, date_str, sigma_days=15):
