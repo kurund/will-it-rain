@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from datetime import datetime
 
 
 GWR = pd.read_csv("GlobalWeatherRepository.csv", parse_dates=["last_updated"])
@@ -210,40 +209,38 @@ def model(GWR, country, date_str, sigma_days=15):
 
     pred_headline = f"{headline_core}{aq_tail}{cloud_tail}{cond_tail}"
 
+    # Helper function to safely round values
+    def safe_round(value, decimals):
+        return None if not np.isfinite(value) else round(value, decimals)
+
     summary = {
         "Country": country,
         "Date": date.date().isoformat(),
-        "Pred_Temp_C": round(pred_temp_c, 1),
-        "Temp_likely_min_C": round(temp_p50[0], 1),
-        "Temp_likely_max_C": round(temp_p50[1], 1),
-        "Temp_possible_min_C": round(temp_p90[0], 1),
-        "Temp_possible_max_C": round(temp_p90[1], 1),
-        "Prob_Rain_pct": round(100 * prob_rain, 1),
-        "Pred_Rain_mm": round(rain_mm, 2),
-        "Prob_Calm_pct": round(100 * prob_calm, 1),
-        "Prob_LightBreeze_pct": round(100 * prob_lightbreeze, 1),
-        "Prob_Windy_pct": round(100 * prob_windy, 1),
-        "Prob_Gale_pct": round(100 * prob_gale, 1),
-        "Pred_Wind_kph": (
-            None if not np.isfinite(pred_wind_kph) else round(pred_wind_kph, 1)
-        ),
-        "AQ_Low_pct": round(100 * prob_low, 1),
-        "AQ_Moderate_pct": round(100 * prob_moderate, 1),
-        "AQ_High_pct": round(100 * prob_high, 1),
-        "AQ_VeryHigh_pct": round(100 * prob_very_high, 1),
-        "Pred_AQ_Index": round(pred_aq_index, 1),
-        "Pred_FeelsLike_C": (
-            None if not np.isfinite(t_for_feel) else round(t_for_feel, 1)
-        ),
-        "Pred_Cloud_pct": (
-            None if not np.isfinite(pred_cloud_pct) else round(pred_cloud_pct, 0)
-        ),
-        "Pred_Condition": pred_condition,  # weighted mode of condition_text
-        "Pred_Temp_Class": temp_cls,
-        "Pred_Wind_Class": wind_cls,
-        "Pred_Wet_Class": wet_cls,
-        "Pred_AQ_Class": aq_cls,
-        "Pred_Headline": pred_headline,  # readable one-liner
+        "Pred_Temp_C": safe_round(pred_temp_c, 1),
+        "Temp_likely_min_C": safe_round(temp_p50[0], 1),
+        "Temp_likely_max_C": safe_round(temp_p50[1], 1),
+        "Temp_possible_min_C": safe_round(temp_p90[0], 1),
+        "Temp_possible_max_C": safe_round(temp_p90[1], 1),
+        "Prob_Rain_pct": safe_round(100 * prob_rain, 1),
+        "Pred_Rain_mm": safe_round(rain_mm, 2),
+        "Prob_Calm_pct": safe_round(100 * prob_calm, 1),
+        "Prob_LightBreeze_pct": safe_round(100 * prob_lightbreeze, 1),
+        "Prob_Windy_pct": safe_round(100 * prob_windy, 1),
+        "Prob_Gale_pct": safe_round(100 * prob_gale, 1),
+        "Pred_Wind_kph": safe_round(pred_wind_kph, 1),
+        "AQ_Low_pct": safe_round(100 * prob_low, 1),
+        "AQ_Moderate_pct": safe_round(100 * prob_moderate, 1),
+        "AQ_High_pct": safe_round(100 * prob_high, 1),
+        "AQ_VeryHigh_pct": safe_round(100 * prob_very_high, 1),
+        "Pred_AQ_Index": safe_round(pred_aq_index, 1),
+        "Pred_FeelsLike_C": safe_round(t_for_feel, 1),
+        "Pred_Cloud_pct": safe_round(pred_cloud_pct, 0),
+        "Pred_Condition": pred_condition if isinstance(pred_condition, str) else None,
+        "Pred_Temp_Class": temp_cls if isinstance(temp_cls, str) else None,
+        "Pred_Wind_Class": wind_cls if isinstance(wind_cls, str) else None,
+        "Pred_Wet_Class": wet_cls if isinstance(wet_cls, str) else None,
+        "Pred_AQ_Class": aq_cls if isinstance(aq_cls, str) else None,
+        "Pred_Headline": pred_headline if isinstance(pred_headline, str) else None,
     }
 
     return summary

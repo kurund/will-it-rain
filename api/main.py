@@ -1,6 +1,5 @@
 import datetime
 import json
-import random
 from typing import Union
 
 from fastapi import FastAPI, HTTPException
