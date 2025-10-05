@@ -9,15 +9,30 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { Button } from '../components/Button';
 
 interface Prediction {
-  date: string;
-  weather: string;
-  probability: number;
+  Country: string;
+  Date: string;
+  Pred_Temp_C: number;
+  Temp_likely_min_C: number;
+  Temp_likely_max_C: number;
+  Temp_possible_min_C: number;
+  Temp_possible_max_C: number;
+  Prob_Rain_pct: number;
+  Pred_Rain_mm: number;
+  Prob_Calm_pct: number;
+  Prob_LightBreeze_pct: number;
+  Prob_Windy_pct: number;
+  Prob_Gale_pct: number;
+  AQ_Low_pct: number;
+  AQ_Moderate_pct: number;
+  AQ_High_pct: number;
+  AQ_VeryHigh_pct: number;
+  Pred_AQ_Index: number;
 }
 
 const data = locations
   .map(item => ({
     label: item.location_name,
-    value: item.location_name,
+    value: item.country,
   }))
   .sort((a, b) => (a.label > b.label ? 1 : -1));
 
@@ -115,8 +130,12 @@ export const HomeScreen: FC = () => {
 
       {prediction ? (
         <View>
-          <Text style={styles.predictionText}>{prediction.weather}</Text>
-          <Text style={styles.predictionText}>{prediction.probability}</Text>
+          <Text style={styles.predictionText}>
+            Temp: {prediction.Pred_Temp_C}C
+          </Text>
+          <Text style={styles.predictionText}>
+            Rain: {prediction.Pred_Rain_mm}mm
+          </Text>
         </View>
       ) : (
         <></>
