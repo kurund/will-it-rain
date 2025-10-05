@@ -17,7 +17,7 @@
 
 		// Validate that the location is exactly one from our list
 		const isValidLocation = locations.some(
-			(loc) => loc.location_name === location.trim()
+			(loc) => `${loc.location_name}, ${loc.country}` === location.trim()
 		);
 
 		if (location.trim() && date && isValidLocation) {
@@ -72,7 +72,7 @@
 
 	// Handle location selection
 	function selectLocation(selectedLocation: { country: string; location_name: string }) {
-		location = `${selectedLocation.location_name}`;
+		location = `${selectedLocation.location_name}, ${selectedLocation.country}`;
 		searchTerm = location;
 		showDropdown = false;
 	}
@@ -267,7 +267,9 @@
 
 			<button
 				type="submit"
-				disabled={!location.trim() || !date || !locations.some(loc => loc.location_name === location.trim())}
+				disabled={!location.trim() ||
+					!date ||
+					!locations.some((loc) => `${loc.location_name}, ${loc.country}` === location.trim())}
 				class="w-full transform rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 text-lg font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg focus:ring-4 focus:ring-blue-300 focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				<span class="flex items-center justify-center"> ✈️ Plan My Trip </span>
