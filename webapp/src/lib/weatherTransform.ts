@@ -89,7 +89,7 @@ function getAirQualityLevel(index: number): { level: string; description: string
 	return { level: 'Very High', description: 'Health warnings of emergency conditions' };
 }
 
-function getRainDescription(probability: number, amount: number): string {
+function getRainDescription(probability: number): string {
 	if (probability < 20) return 'Very unlikely to rain';
 	if (probability < 40) return 'Low chance of rain';
 	if (probability < 60) return 'Moderate chance of rain';
@@ -168,7 +168,7 @@ export function transformWeatherData(raw: RawWeatherResponse): TransformedWeathe
 	].filter((w) => w.probability > 0);
 
 	const airQualityLevel = getAirQualityLevel(raw.Pred_AQ_Index);
-	const rainDescription = getRainDescription(raw.Prob_Rain_pct, raw.Pred_Rain_mm);
+	const rainDescription = getRainDescription(raw.Prob_Rain_pct);
 	const windDescription = getWindDescription(windConditions);
 	const weatherCondition = getWeatherCondition(raw.Pred_Condition);
 	const cloudsDescription = getCloudsDescription(raw.Pred_Cloud_pct);
