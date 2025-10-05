@@ -99,4 +99,3 @@ export async function geocodeWithFallback(locationName: string): Promise<GeoLoca
 	console.warn(`No coordinates found for: ${locationName}`);
 	return null;
 }
-

@@ -3,6 +3,7 @@
 	import { getSearchHistory } from '$lib/searchHistory';
 	import { geocodeWithFallback, type GeoLocation } from '$lib/geocoding';
 	import Globe from '$lib/components/Globe.svelte';
+	import CSSParticles from '$lib/components/CSSParticles.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -212,6 +213,7 @@
 					weatherCondition = {
 						weather: existingSearch.weatherResult.weather,
 						probability: existingSearch.weatherResult.probability,
+						airQuality: existingSearch.weatherResult.airQuality,
 						date: existingSearch.weatherResult.date
 					};
 				} else {
@@ -264,7 +266,16 @@
 	});
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 p-4">
+<div
+	class="relative min-h-screen overflow-hidden bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 p-4"
+>
+	<!-- Weather & Air Quality Effects -->
+
+	<CSSParticles
+		weatherCondition={weatherCondition?.weather}
+		airQuality={weatherCondition?.airQuality}
+	/>
+
 	<div class="relative mx-auto max-w-4xl">
 		<!-- Back Navigation -->
 		{#if !showWeatherData}
