@@ -4,6 +4,7 @@ export interface SearchHistoryItem {
 	date: string;
 	timestamp: number;
 	weatherResult?: any; // Store the entire transformedWeather object
+	coordinates?: { lat: number; lng: number }; // Store coordinates to avoid geocoding calls
 }
 
 const STORAGE_KEY = 'weather_search_history';
@@ -20,7 +21,12 @@ export function getSearchHistory(): SearchHistoryItem[] {
 	}
 }
 
-export function addSearchToHistory(location: string, date: string, weatherResult?: any): string {
+export function addSearchToHistory(
+	location: string,
+	date: string,
+	weatherResult?: any,
+	coordinates?: { lat: number; lng: number }
+): string {
 	if (typeof window === 'undefined') return '';
 
 	const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -29,7 +35,8 @@ export function addSearchToHistory(location: string, date: string, weatherResult
 		location,
 		date,
 		timestamp: Date.now(),
-		...(weatherResult && { weatherResult })
+		...(weatherResult && { weatherResult }),
+		...(coordinates && { coordinates })
 	};
 
 	try {

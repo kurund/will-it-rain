@@ -156,8 +156,8 @@
 			transformedWeather = transformWeatherData(data);
 
 			// Save weather result to search history (only for new searches, not from history)
-			if (!searchId && transformedWeather) {
-				addSearchToHistory(location, date, transformedWeather);
+			if (!searchId && transformedWeather && geoLocation) {
+				addSearchToHistory(location, date, transformedWeather, geoLocation);
 			}
 		} catch (err) {
 			console.error('Error fetching weather data:', err);
@@ -169,16 +169,20 @@
 		}
 	}
 
-	async function fetchCurrentWeather(location: string) {
+	async function fetchCurrentWeather(location: string, coordinates?: { lat: number; lng: number }) {
 		if (!location) return;
 
 		loadingCurrent = true;
 
 		try {
-			// Get coordinates for the location
-			const coords = await geocodeWithFallback(location);
+			let coords = coordinates;
+
+			// Get coordinates only if not provided (for new searches)
 			if (!coords) {
-				throw new Error('Could not find coordinates for location');
+				coords = await geocodeWithFallback(location);
+				if (!coords) {
+					throw new Error('Could not find coordinates for location');
+				}
 			}
 
 			// Use Open-Meteo API for current weather
@@ -234,15 +238,16 @@
 				showWeatherDetails = true;
 
 				if (existingSearch.weatherResult) {
-					// For cached data, we'll need to reconstruct or fetch fresh data
-					// since the old format is different from our new transformed format
-					await fetchWeatherData(location, date);
+					// Use cached weather data from localStorage
+					transformedWeather = existingSearch.weatherResult;
 				} else {
-					// Fetch fresh weather data
+					// Fetch fresh weather data if not cached
 					await fetchWeatherData(location, date);
 				}
-				// Also fetch current weather as additional info
-				fetchCurrentWeather(location);
+				// Fetch current weather using stored coordinates (no geocoding needed)
+				if (existingSearch.coordinates) {
+					fetchCurrentWeather(location, existingSearch.coordinates);
+				}
 				return;
 			}
 		}
