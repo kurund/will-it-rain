@@ -6,6 +6,8 @@ from typing import Union
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from model import get_prediction
+
 app = FastAPI()
 
 origins = ["http://localhost:5173", "https://getmyweather.info"]
@@ -39,18 +41,20 @@ weather_categories = [
 ]
 
 
-def get_result(date: str):
+def get_result(location: str, date: str):
     request_date = datetime.datetime.now().date().isoformat()
     cache_key = f"{request_date}_{date}"
 
     if cache_key in cache.keys():
         return json.loads(cache[cache_key])
 
-    result = {
-        "date": date,
-        "weather": weather_categories[random.randint(0, len(weather_categories) - 1)],
-        "probability": round(random.random() * 100, 1),
-    }
+    result = get_prediction(location, date)
+
+    # result = {
+    #     "date": date,
+    #     "weather": weather_categories[random.randint(0, len(weather_categories) - 1)],
+    #     "probability": round(random.random() * 100, 1),
+    # }
 
     cache[cache_key] = json.dumps(result)
 
@@ -67,5 +71,5 @@ def get_weather(location: Union[str, None] = None, date: Union[str, None] = None
     except:
         raise HTTPException(status_code=400, detail="Bad date")
 
-    data = get_result(date)
+    data = get_result(location, date)
     return data
