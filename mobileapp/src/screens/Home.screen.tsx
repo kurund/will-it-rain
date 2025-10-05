@@ -87,6 +87,21 @@ export const HomeScreen: FC = () => {
     setPrediction(undefined);
   };
 
+  const getWeatherEmoji = (weather: string) => {
+    const weatherMap: Record<string, string> = {
+      sunny: '☀️',
+      cloudy: '☁️',
+      rainy: '🌧️',
+      stormy: '⛈️',
+      snowy: '❄️',
+      foggy: '🌫️',
+      windy: '💨',
+      partly_cloudy: '⛅',
+      overcast: '☁️',
+    };
+    return weatherMap[weather?.toLowerCase()] || '🌤️';
+  };
+
   const getContent = () => {
     if (prediction) {
       return (
@@ -97,11 +112,19 @@ export const HomeScreen: FC = () => {
             <Text style={styles.country}>{prediction.Country}</Text>
             <Text style={styles.date}>{friendlyDate}</Text>
 
+            <View style={styles.emojiContainer}>
+              <Text style={styles.emoji}>
+                {getWeatherEmoji(prediction.Pred_Condition)}
+              </Text>
+              <Text style={styles.condition}>{prediction.Pred_Condition}</Text>
+            </View>
+
             <View style={styles.predictionHeadlineContainer}>
               <Text style={styles.predictionHeadline}>
                 {prediction.Pred_Headline}
               </Text>
             </View>
+
             <Text style={styles.predictionText}>
               Temp: {prediction.Pred_Temp_C}°C
             </Text>
@@ -260,7 +283,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff9',
     borderRadius: 20,
     padding: 20,
-    marginBottom: 20,
+    marginTop: 20,
+    marginBottom: 40,
   },
   predictionHeadline: {
     // color: '#fff',
@@ -299,6 +323,21 @@ const styles = StyleSheet.create({
   },
 
   date: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 20,
+  },
+
+  emojiContainer: {
+    alignItems: 'center',
+  },
+
+  emoji: {
+    fontSize: 72,
+  },
+
+  condition: {
     fontSize: 18,
     fontWeight: '700',
     color: '#fff',
